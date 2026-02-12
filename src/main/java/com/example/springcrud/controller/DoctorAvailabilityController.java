@@ -29,23 +29,9 @@ public class DoctorAvailabilityController {
     @Autowired
     private DoctorAvailabilityRepository availabilityRepository;
 
-    // READ - Get all availability records
-    @GetMapping
-    public ResponseEntity<List<DoctorAvailability>> getAllAvailability() {
-        List<DoctorAvailability> availabilities = availabilityRepository.findAll();
-        return new ResponseEntity<>(availabilities, HttpStatus.OK);
-    }
-
-    // READ - Get specific slot by ID
-    @GetMapping("/{id}")
-    public ResponseEntity<DoctorAvailability> getAvailabilityById(@PathVariable String id) {
-        Optional<DoctorAvailability> availability = availabilityRepository.findById(id);
-        return availability.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                           .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
-
     /**
-     * FILTER - Combined search for Doctor Availability
+     * ✅ 1. FILTER - Specific path MUST come before /{id}
+     * Combined search for Doctor Availability
      * Example: /api/doctor-availability/filter?day=Monday&isAvailable=true
      */
     @GetMapping("/filter")
@@ -56,57 +42,70 @@ public class DoctorAvailabilityController {
         
         List<DoctorAvailability> list = availabilityRepository.findAll();
 
-        // 1. Filter by Doctor ID
-        if (doctorId != null && !doctorId.isEmpty()) {
-            list = list.stream()
-                .filter(a -> a.getDoctorId() != null && a.getDoctorId().equalsIgnoreCase(doctorId))
-                .collect(Collectors.toList());
-        }
+        // Optimized single stream chain
+        List<DoctorAvailability> filteredList = list.stream()
+            .filter(a -> doctorId == null || doctorId.isEmpty() || 
+                    (a.getDoctorId() != null && a.getDoctorId().equalsIgnoreCase(doctorId)))
+            .filter(a -> day == null || day.isEmpty() || 
+                    (a.getDay() != null && a.getDay().equalsIgnoreCase(day)))
+            .filter(a -> isAvailable == null || a.isAvailable() == isAvailable)
+            .collect(Collectors.toList());
 
-        // 2. Filter by Day (Monday, Tuesday, etc.)
-        if (day != null && !day.isEmpty()) {
-            list = list.stream()
-                .filter(a -> a.getDay() != null && a.getDay().equalsIgnoreCase(day))
-                .collect(Collectors.toList());
-        }
-
-        // 3. Filter by Availability Status
-        if (isAvailable != null) {
-            list = list.stream()
-                .filter(a -> a.isAvailable() == isAvailable)
-                .collect(Collectors.toList());
-        }
-
-        return new ResponseEntity<>(list, HttpStatus.OK);
+        return new ResponseEntity<>(filteredList, HttpStatus.OK);
     }
 
-    // CREATE
+    /**
+     * ✅ 2. READ ALL
+     */
+    @GetMapping
+    public ResponseEntity<List<DoctorAvailability>> getAllAvailability() {
+        List<DoctorAvailability> availabilities = availabilityRepository.findAll();
+        return new ResponseEntity<>(availabilities, HttpStatus.OK);
+    }
+
+    /**
+     * ✅ 3. READ BY ID - Generic dynamic path comes LAST
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<DoctorAvailability> getAvailabilityById(@PathVariable String id) {
+        Optional<DoctorAvailability> availability = availabilityRepository.findById(id);
+        return availability.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+                           .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    /**
+     * ✅ 4. CREATE
+     */
     @PostMapping
     public ResponseEntity<DoctorAvailability> createAvailability(@RequestBody DoctorAvailability availability) {
-        DoctorAvailability savedAvailability = availabilityRepository.save(availability);
-        return new ResponseEntity<>(savedAvailability, HttpStatus.CREATED);
+        try {
+            DoctorAvailability savedAvailability = availabilityRepository.save(availability);
+            return new ResponseEntity<>(savedAvailability, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    // UPDATE
+    /**
+     * ✅ 5. UPDATE
+     */
     @PutMapping("/{id}")
     public ResponseEntity<DoctorAvailability> updateAvailability(@PathVariable String id, @RequestBody DoctorAvailability details) {
-        Optional<DoctorAvailability> existingOptional = availabilityRepository.findById(id);
-
-        if (existingOptional.isPresent()) {
-            DoctorAvailability availability = existingOptional.get();
+        return availabilityRepository.findById(id).map(availability -> {
             availability.setDoctorId(details.getDoctorId());
             availability.setDay(details.getDay());
             availability.setStartTime(details.getStartTime());
             availability.setEndTime(details.getEndTime());
             availability.setAvailable(details.isAvailable());
             
-            return new ResponseEntity<>(availabilityRepository.save(availability), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+            DoctorAvailability updated = availabilityRepository.save(availability);
+            return new ResponseEntity<>(updated, HttpStatus.OK);
+        }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // DELETE
+    /**
+     * ✅ 6. DELETE
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> deleteAvailability(@PathVariable String id) {
         try {

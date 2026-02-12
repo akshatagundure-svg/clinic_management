@@ -29,46 +29,15 @@ public class PatientController {
     @Autowired
     private PatientRepository patientRepository;
 
-    // ✅ CREATE ACCOUNT (Self Register)
-    @PostMapping("/register")
-    public ResponseEntity<Patient> registerPatient(@RequestBody Patient patient) {
-        if (patient.getFullName() == null || patient.getPhoneNumber() == null || patient.getEmailAddress() == null) {
-            return ResponseEntity.badRequest().build();
-        }
-        if (patient.getPatientId() == null || patient.getPatientId().isEmpty()) {
-            patient.setPatientId("PAT-" + UUID.randomUUID().toString().substring(0, 6));
-        }
-        return new ResponseEntity<>(patientRepository.save(patient), HttpStatus.CREATED);
+    // ✅ 1. COUNT (Specific path first)
+    @GetMapping("/count")
+    public long getCount() {
+        return patientRepository.count();
     }
 
-    // ✅ PATIENT LOGIN
-   
-
-    // ✅ READ ALL (With 500 Error Protection)
-    @GetMapping
-    public ResponseEntity<?> getAllPatients() {
-        try {
-            List<Patient> patients = patientRepository.findAll();
-            return ResponseEntity.ok(patients);
-        } catch (Exception e) {
-            // Logs the specific deserialization error to the console
-            System.err.println("MAPPING ERROR: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Database record has invalid date format. Expected yyyy-MM-dd. Error: " + e.getMessage());
-        }
-    }
-
-    // ✅ READ BY ID
-    @GetMapping("/{id}")
-    public ResponseEntity<Patient> getPatientById(@PathVariable String id) {
-        return patientRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    // ✅ ADVANCED FILTER
-    @GetMapping("/filter")
+    // ✅ 2. ADVANCED FILTER/SEARCH (Specific path second)
+    // Access this via /api/patients/search or /api/patients/filter
+    @GetMapping("/search")
     public ResponseEntity<List<Patient>> filterPatients(
             @RequestParam(required = false) String patientId,
             @RequestParam(required = false) String name,
@@ -83,11 +52,11 @@ public class PatientController {
         }
         if (name != null && !name.isEmpty()) {
             String n = name.toLowerCase();
-            patients = patients.stream().filter(p -> p.getFullName().toLowerCase().contains(n)).collect(Collectors.toList());
+            patients = patients.stream().filter(p -> p.getFullName() != null && p.getFullName().toLowerCase().contains(n)).collect(Collectors.toList());
         }
         if (allergy != null && !allergy.isEmpty()) {
             String a = allergy.toLowerCase();
-            patients = patients.stream().filter(p -> p.getAllergies().stream().anyMatch(x -> x.toLowerCase().contains(a))).collect(Collectors.toList());
+            patients = patients.stream().filter(p -> p.getAllergies() != null && p.getAllergies().stream().anyMatch(x -> x.toLowerCase().contains(a))).collect(Collectors.toList());
         }
         if (bloodGroup != null && !bloodGroup.isEmpty()) {
             patients = patients.stream().filter(p -> p.getBloodGroup() != null && p.getBloodGroup().equalsIgnoreCase(bloodGroup)).collect(Collectors.toList());
@@ -98,13 +67,46 @@ public class PatientController {
         return ResponseEntity.ok(patients);
     }
 
-    // ✅ CREATE (Full Form)
+    // ✅ 3. READ ALL
+    @GetMapping
+    public ResponseEntity<?> getAllPatients() {
+        try {
+            List<Patient> patients = patientRepository.findAll();
+            return ResponseEntity.ok(patients);
+        } catch (Exception e) {
+            System.err.println("MAPPING ERROR: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Database record error: " + e.getMessage());
+        }
+    }
+
+    // ✅ 4. READ BY ID (Dynamic path MUST come after specific paths like /search and /count)
+    @GetMapping("/{id}")
+    public ResponseEntity<Patient> getPatientById(@PathVariable String id) {
+        return patientRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // ✅ 5. CREATE ACCOUNT (Self Register)
+    @PostMapping("/register")
+    public ResponseEntity<Patient> registerPatient(@RequestBody Patient patient) {
+        if (patient.getFullName() == null || patient.getPhoneNumber() == null || patient.getEmailAddress() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        if (patient.getPatientId() == null || patient.getPatientId().isEmpty()) {
+            patient.setPatientId("PAT-" + UUID.randomUUID().toString().substring(0, 6));
+        }
+        return new ResponseEntity<>(patientRepository.save(patient), HttpStatus.CREATED);
+    }
+
+    // ✅ 6. CREATE (Full Form)
     @PostMapping
     public ResponseEntity<Patient> createPatient(@RequestBody Patient patient) {
         return new ResponseEntity<>(patientRepository.save(patient), HttpStatus.CREATED);
     }
 
-    // ✅ UPDATE
+    // ✅ 7. UPDATE
     @PutMapping("/{id}")
     public ResponseEntity<Patient> updatePatient(@PathVariable String id, @RequestBody Patient d) {
         return patientRepository.findById(id)
@@ -127,17 +129,11 @@ public class PatientController {
             }).orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ DELETE
+    // ✅ 8. DELETE
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletePatient(@PathVariable String id) {
         if (!patientRepository.existsById(id)) return ResponseEntity.notFound().build();
         patientRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
-
-    // ✅ COUNT
-    @GetMapping("/count")
-public long getCount() {
-    return patientRepository.count(); // Returns a simple number
-}
 }

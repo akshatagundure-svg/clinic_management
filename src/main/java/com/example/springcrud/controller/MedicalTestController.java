@@ -22,35 +22,21 @@ import com.example.springcrud.repository.MedicalTestRepository;
 
 @RestController
 @RequestMapping("/api/medical-tests")
-@CrossOrigin(origins = "*") // Allows connection from Port 5500
+@CrossOrigin(origins = "*") 
 public class MedicalTestController {
 
     @Autowired
     private MedicalTestRepository medicalTestRepository;
 
-    // READ - Get all medical tests
-    @GetMapping
-    public ResponseEntity<List<MedicalTest>> getAllMedicalTests() {
-        return new ResponseEntity<>(medicalTestRepository.findAll(), HttpStatus.OK);
-    }
-
-    // ✅ ADDED: COUNT - For Dashboard Stat Cards
-    // This allows dashboard.js to fetch a simple number instead of a full list
+    // ✅ 1. COUNT - Specific path MUST come before /{id}
     @GetMapping("/count")
     public long getCount() {
         return medicalTestRepository.count();
     }
 
-    // READ - Get by ID
-    @GetMapping("/{id}")
-    public ResponseEntity<MedicalTest> getMedicalTestById(@PathVariable String id) {
-        return medicalTestRepository.findById(id)
-                .map(test -> new ResponseEntity<>(test, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
-
     /**
-     * FILTER - Multi-criteria filter for Medical Tests
+     * ✅ 2. FILTER - Specific path MUST come before /{id}
+     * Multi-criteria filter for Medical Tests
      */
     @GetMapping("/filter")
     public ResponseEntity<List<MedicalTest>> filterMedicalTests(
@@ -62,47 +48,42 @@ public class MedicalTestController {
         
         List<MedicalTest> tests = medicalTestRepository.findAll();
 
-        if (patientId != null && !patientId.isEmpty()) {
-            tests = tests.stream()
-                .filter(t -> t.getPatientId() != null && t.getPatientId().equalsIgnoreCase(patientId))
-                .collect(Collectors.toList());
-        }
+        // Optimized single stream chain
+        List<MedicalTest> filteredTests = tests.stream()
+            .filter(t -> patientId == null || patientId.isEmpty() || 
+                    (t.getPatientId() != null && t.getPatientId().equalsIgnoreCase(patientId)))
+            .filter(t -> doctorId == null || doctorId.isEmpty() || 
+                    (t.getDoctorId() != null && t.getDoctorId().equalsIgnoreCase(doctorId)))
+            .filter(t -> testName == null || testName.isEmpty() || 
+                    (t.getTestName() != null && t.getTestName().toLowerCase().contains(testName.toLowerCase())))
+            .filter(t -> category == null || category.isEmpty() || 
+                    (t.getCategory() != null && t.getCategory().equalsIgnoreCase(category)))
+            .filter(t -> resultStatus == null || resultStatus.isEmpty() || 
+                    (t.getResultStatus() != null && t.getResultStatus().equalsIgnoreCase(resultStatus)))
+            .collect(Collectors.toList());
 
-        if (doctorId != null && !doctorId.isEmpty()) {
-            tests = tests.stream()
-                .filter(t -> t.getDoctorId() != null && t.getDoctorId().equalsIgnoreCase(doctorId))
-                .collect(Collectors.toList());
-        }
-
-        if (testName != null && !testName.isEmpty()) {
-            tests = tests.stream()
-                .filter(t -> t.getTestName() != null && 
-                             t.getTestName().toLowerCase().contains(testName.toLowerCase()))
-                .collect(Collectors.toList());
-        }
-
-        if (category != null && !category.isEmpty()) {
-            tests = tests.stream()
-                .filter(t -> t.getCategory() != null && t.getCategory().equalsIgnoreCase(category))
-                .collect(Collectors.toList());
-        }
-
-        if (resultStatus != null && !resultStatus.isEmpty()) {
-            tests = tests.stream()
-                .filter(t -> t.getResultStatus() != null && t.getResultStatus().equalsIgnoreCase(resultStatus))
-                .collect(Collectors.toList());
-        }
-
-        return new ResponseEntity<>(tests, HttpStatus.OK);
+        return new ResponseEntity<>(filteredTests, HttpStatus.OK);
     }
 
-    // CREATE
+    // ✅ 3. READ ALL
+    @GetMapping
+    public ResponseEntity<List<MedicalTest>> getAllMedicalTests() {
+        return new ResponseEntity<>(medicalTestRepository.findAll(), HttpStatus.OK);
+    }
+
+    // ✅ 4. READ BY ID - Generic dynamic path comes LAST
+    @GetMapping("/{id}")
+    public ResponseEntity<MedicalTest> getMedicalTestById(@PathVariable String id) {
+        return medicalTestRepository.findById(id)
+                .map(test -> new ResponseEntity<>(test, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    // ✅ 5. CREATE
     @PostMapping
     public ResponseEntity<MedicalTest> createMedicalTest(@RequestBody MedicalTest medicalTest) {
         try {
-            // Business Logic: Ensure default status
             if (medicalTest.getResultStatus() == null) medicalTest.setResultStatus("Pending");
-            
             MedicalTest savedTest = medicalTestRepository.save(medicalTest);
             return new ResponseEntity<>(savedTest, HttpStatus.CREATED);
         } catch (Exception e) {
@@ -110,7 +91,7 @@ public class MedicalTestController {
         }
     }
 
-    // UPDATE
+    // ✅ 6. UPDATE
     @PutMapping("/{id}")
     public ResponseEntity<MedicalTest> updateMedicalTest(@PathVariable String id, @RequestBody MedicalTest testDetails) {
         return medicalTestRepository.findById(id)
@@ -128,7 +109,7 @@ public class MedicalTestController {
             .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // DELETE
+    // ✅ 7. DELETE
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMedicalTest(@PathVariable String id) {
         try {

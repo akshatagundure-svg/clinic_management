@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthFlow Pro | Clinic Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        .glass-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 1.5rem; }
+        .sidebar-gradient { background: #0f172a; }
+        .input-focus { transition: all 0.2s; }
+        .input-focus:focus { ring: 2px; ring-color: #3b82f6; outline: none; border-color: transparent; }
+    </style>
+</head>
+<body class="flex">
+
+    <aside class="sidebar-gradient fixed left-0 top-0 h-screen w-64 text-white shadow-2xl z-50">
+        <div class="p-6 text-center border-b border-slate-700/50">
+            <h2 class="text-xl font-bold tracking-wider text-blue-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+            <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1 font-semibold">Enterprise Dashboard</p>
+        </div>
+        
+        <nav class="mt-6 px-4 space-y-1">
+            <a onclick="window.location.href='/dashboard'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl bg-blue-600 text-white cursor-pointer transition-all hover:bg-blue-500 shadow-lg shadow-blue-900/20">
+                <i class="fas fa-chart-pie mr-3"></i> Dashboard Overview
+            </a>
+            
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Core Management</div>
+            <a onclick="window.location.href='/clinic-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-hospital mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Clinics
+            </a>
+            <a onclick="window.location.href='/doctor-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-user-md mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Doctors
+            </a>
+            <a onclick="window.location.href='/patient-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-hospital-user mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Patients
+            </a>
+            <a onclick="window.location.href='/availability-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-clock mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Availability
+            </a>
+            
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Operations</div>
+            <a onclick="window.location.href='/prescription-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-history mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Prescriptions
+            </a>
+            <a onclick="window.location.href='/medicine-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-pills mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Pharmacy
+            </a>
+            <a onclick="window.location.href='/medical-test-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-microscope mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Lab Reports
+            </a>
+        </nav>
+    </aside>
+
+    <main class="ml-64 p-8 w-full">
+        <header class="max-w-4xl mx-auto mb-10 flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div>
+                <h1 id="pageTitle" class="text-2xl font-bold text-slate-800">Clinic Registration</h1>
+                <p id="pageSubTitle" class="text-slate-500 text-xs">Configure healthcare facility operational parameters</p>
+            </div>
+        </header>
+
+        <div class="glass-card max-w-4xl mx-auto p-10 shadow-xl mb-10">
+            <form id="clinicForm" class="space-y-10">
+                
+                <div>
+                    <h3 class="text-blue-500 text-[10px] font-extrabold uppercase tracking-widest mb-6 border-l-4 border-blue-500 pl-3">Facility Foundation</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="col-span-2">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Full Clinic Name</label>
+                            <input type="text" id="clinicName" required class="w-full px-5 py-3 rounded-xl bg-slate-50 border border-slate-200 input-focus">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Category (Type)</label>
+                            <select id="clinicType" class="w-full px-5 py-3 rounded-xl bg-slate-50 border border-slate-200 outline-none">
+                                <option value="CLINIC">CLINIC</option>
+                                <option value="HOSPITAL">HOSPITAL</option>
+                                <option value="OPD">OPD</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Operational Status</label>
+                            <select id="status" class="w-full px-5 py-3 rounded-xl bg-slate-50 border border-slate-200 outline-none">
+                                <option value="ACTIVE">ACTIVE</option>
+                                <option value="CLOSED">CLOSED</option>
+                            </select>
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Registration ID</label>
+                            <input type="text" id="registrationNumber" required class="w-full px-5 py-3 rounded-xl bg-slate-50 border border-slate-200 input-focus">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div>
+                        <h3 class="text-blue-500 text-[10px] font-extrabold uppercase tracking-widest mb-6 border-l-4 border-blue-500 pl-3">Location</h3>
+                        <input type="text" id="city" placeholder="City" class="w-full px-5 py-3 rounded-xl bg-slate-50 border border-slate-200 input-focus mb-4">
+                        <input type="text" id="state" placeholder="State" class="w-full px-5 py-3 rounded-xl bg-slate-50 border border-slate-200 input-focus">
+                    </div>
+                    <div>
+                        <h3 class="text-blue-500 text-[10px] font-extrabold uppercase tracking-widest mb-6 border-l-4 border-blue-500 pl-3">Contact</h3>
+                        <input type="text" id="phone" placeholder="Phone Number" class="w-full px-5 py-3 rounded-xl bg-slate-50 border border-slate-200 input-focus mb-4">
+                        <input type="email" id="email" placeholder="Email Address" class="w-full px-5 py-3 rounded-xl bg-slate-50 border border-slate-200 input-focus">
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-blue-500 text-[10px] font-extrabold uppercase tracking-widest mb-6 border-l-4 border-blue-500 pl-3">Operations & Services</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="col-span-2">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Medical Services (e.g. Lab, Pharmacy, X-Ray)</label>
+                            <input type="text" id="services" placeholder="Comma separated services" class="w-full px-5 py-3 rounded-xl bg-slate-50 border border-slate-200 input-focus">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Departments (e.g. General, Ortho)</label>
+                            <input type="text" id="departments" placeholder="Comma separated departments" class="w-full px-5 py-3 rounded-xl bg-slate-50 border border-slate-200 input-focus">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Opening Time</label>
+                            <input type="text" id="openingTime" placeholder="09:00 AM" class="w-full px-5 py-3 rounded-xl bg-slate-50 border border-slate-200 input-focus">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Closing Time</label>
+                            <input type="text" id="closingTime" placeholder="06:00 PM" class="w-full px-5 py-3 rounded-xl bg-slate-50 border border-slate-200 input-focus">
+                        </div>
+                        <div class="col-span-2 flex items-center space-x-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <input type="checkbox" id="appointmentRequired" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                            <label for="appointmentRequired" class="text-sm font-medium text-slate-700">Strict Appointment Requirement for Consultations</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 pt-6">
+                    <button type="submit" id="submitBtn" class="flex-1 bg-blue-600 text-white py-4 rounded-xl font-bold shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all">Register Clinic</button>
+                    <button type="button" onclick="window.history.back()" class="px-12 py-4 rounded-xl border border-slate-200 font-bold text-slate-400 hover:bg-slate-100 transition-all">Back</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        const API_BASE = "http://localhost:8080/api/clinics";
+        const urlParams = new URLSearchParams(window.location.search);
+        const clinicId = urlParams.get('id');
+
+        // LOAD DATA IF EDITING
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (clinicId) {
+                document.getElementById('pageTitle').innerText = "Update Clinic Record";
+                document.getElementById('submitBtn').innerText = "Update Infrastructure";
+                
+                try {
+                    const res = await fetch(`${API_BASE}/${clinicId}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        document.getElementById('clinicName').value = data.clinicName || '';
+                        document.getElementById('clinicType').value = data.clinicType || 'CLINIC';
+                        document.getElementById('status').value = data.status || 'ACTIVE';
+                        document.getElementById('registrationNumber').value = data.registrationNumber || '';
+                        document.getElementById('city').value = data.address?.city || '';
+                        document.getElementById('state').value = data.address?.state || '';
+                        document.getElementById('phone').value = data.contact?.phone || '';
+                        document.getElementById('email').value = data.contact?.email || '';
+                        document.getElementById('openingTime').value = data.openingTime || '';
+                        document.getElementById('closingTime').value = data.closingTime || '';
+                        document.getElementById('appointmentRequired').checked = data.appointmentRequired || false;
+                        
+                        if(data.services) document.getElementById('services').value = data.services.join(', ');
+                        if(data.departments) document.getElementById('departments').value = data.departments.join(', ');
+                    }
+                } catch (err) {
+                    console.error("Load failed", err);
+                }
+            }
+        });
+
+        // FORM SUBMISSION
+        document.getElementById('clinicForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Matches Java Model Fields
+            const clinicPayload = {
+                clinicName: document.getElementById('clinicName').value,
+                clinicType: document.getElementById('clinicType').value,
+                status: document.getElementById('status').value,
+                registrationNumber: document.getElementById('registrationNumber').value,
+                address: {
+                    city: document.getElementById('city').value,
+                    state: document.getElementById('state').value,
+                    country: "India"
+                },
+                contact: {
+                    phone: document.getElementById('phone').value,
+                    email: document.getElementById('email').value
+                },
+                // Map comma-separated strings to Lists
+                services: document.getElementById('services').value.split(',').map(s => s.trim()).filter(s => s !== ""),
+                departments: document.getElementById('departments').value.split(',').map(s => s.trim()).filter(s => s !== ""),
+                openingTime: document.getElementById('openingTime').value,
+                closingTime: document.getElementById('closingTime').value,
+                appointmentRequired: document.getElementById('appointmentRequired').checked
+            };
+
+            const url = clinicId ? `${API_BASE}/${clinicId}` : API_BASE;
+            const method = clinicId ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(clinicPayload)
+                });
+
+                if (response.ok) {
+                    alert(clinicId ? "Clinic Successfully Updated!" : "Clinic Successfully Registered!");
+                    window.location.href = "/clinic-list";
+                } else {
+                    const error = await response.text();
+                    alert("Operation failed: " + error);
+                }
+            } catch (err) {
+                alert("Network Error: Could not connect to backend.");
+            }
+        });
+    </script>
+</body>
+</html>

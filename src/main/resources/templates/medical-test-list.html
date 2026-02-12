@@ -20,7 +20,7 @@
 </head>
 <body class="app-bg text-slate-900 flex">
 
-    <aside class="sidebar-gradient fixed left-0 top-0 h-screen w-64 text-white shadow-2xl z-50">
+        <aside class="sidebar-gradient fixed left-0 top-0 h-screen w-64 text-white shadow-2xl z-50">
         <div class="p-6 text-center border-b border-slate-700/50">
             <h2 class="text-xl font-bold tracking-wider text-blue-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
             <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1 font-semibold">Enterprise Dashboard</p>
@@ -32,6 +32,9 @@
             </a>
             
             <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Core Management</div>
+            <a onclick="window.location.href='/clinic-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-hospital mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Clinics
+            </a>
             <a onclick="window.location.href='/doctor-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
                 <i class="fas fa-user-md mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Doctors
             </a>
@@ -66,10 +69,40 @@
             </button>
         </header>
 
-        <div class="mb-8 relative max-w-md">
-            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-            <input type="text" id="testSearch" onkeyup="filterTests()" placeholder="Search by Patient ID or Test Name..." 
-                class="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm">
+        <div class="glass-card p-6 rounded-2xl shadow-sm mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div class="relative">
+                    <i class="fas fa-id-card absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="searchPatientId" placeholder="Patient ID..." 
+                        class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm">
+                </div>
+                
+                <div class="relative">
+                    <i class="fas fa-vial absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="searchTestName" placeholder="Test name..." 
+                        class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm">
+                </div>
+
+                <div class="relative">
+                    <i class="fas fa-layer-group absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="searchCategory" placeholder="Category..." 
+                        class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm">
+                </div>
+
+                <div class="relative">
+                    <i class="fas fa-info-circle absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <select id="searchStatus" class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm appearance-none">
+                        <option value="">All Statuses</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+                <button onclick="performSearch()" class="bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-700 transition-all shadow-md text-xs tracking-widest uppercase">
+                    <i class="fas fa-filter mr-2"></i> Filter Lab
+                </button>
+            </div>
         </div>
 
         <div class="glass-card rounded-2xl shadow-sm overflow-hidden">
@@ -110,17 +143,19 @@
 
         function renderTable(tests) {
             const body = document.getElementById('testTableBody');
-            if (tests.length === 0) {
+            
+            if (!tests || tests.length === 0) {
                 body.innerHTML = '<tr><td colspan="6" class="p-12 text-center text-slate-400 italic">No diagnostic records available.</td></tr>';
                 return;
             }
+
             body.innerHTML = tests.map(t => {
                 let statusStyle = "bg-amber-50 text-amber-600 border border-amber-100";
                 if (t.resultStatus === 'Completed') statusStyle = "bg-emerald-50 text-emerald-600 border border-emerald-100";
                 if (t.resultStatus === 'Cancelled') statusStyle = "bg-slate-100 text-slate-500";
 
                 return `
-                <tr class="hover:bg-slate-50/50 transition-colors test-row">
+                <tr class="hover:bg-slate-50/50 transition-colors">
                     <td class="px-8 py-5">
                         <span class="font-mono text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-md border border-blue-100">
                             ${t.patientId}
@@ -136,7 +171,7 @@
                         <span class="bg-slate-100 px-2 py-1 rounded text-[10px] uppercase tracking-tighter">${t.category}</span>
                     </td>
                     <td class="px-8 py-5 font-bold text-slate-700 text-xs">
-                        $${Number(t.price).toFixed(2)}
+                        ₹${t.price ? Number(t.price).toFixed(2) : '0.00'}
                     </td>
                     <td class="px-8 py-5">
                         <span class="text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-tighter ${statusStyle}">
@@ -145,15 +180,39 @@
                     </td>
                     <td class="px-8 py-5 text-right">
                         <div class="flex justify-end gap-2">
-                            <button onclick="editTest('${t.id}')" class="text-blue-600 hover:bg-blue-50 w-8 h-8 flex items-center justify-center rounded-lg transition-all">
+                            <button onclick="editTest('${t.id}')" class="text-blue-600 hover:bg-blue-50 w-8 h-8 flex items-center justify-center rounded-lg transition-all" title="Edit">
                                 <i class="fas fa-edit text-xs"></i>
                             </button>
-                            <button onclick="deleteTest('${t.id}', '${t.testName}')" class="text-rose-500 hover:bg-rose-50 w-8 h-8 flex items-center justify-center rounded-lg transition-all">
+                            <button onclick="deleteTest('${t.id}', '${t.testName}')" class="text-rose-500 hover:bg-rose-50 w-8 h-8 flex items-center justify-center rounded-lg transition-all" title="Delete">
                                 <i class="fas fa-trash-alt text-xs"></i>
                             </button>
                         </div>
                     </td>
-                </tr>`}).join('');
+                </tr>`;
+            }).join('');
+        }
+
+        async function performSearch() {
+            const patientId = document.getElementById('searchPatientId').value;
+            const testName = document.getElementById('searchTestName').value;
+            const category = document.getElementById('searchCategory').value;
+            const status = document.getElementById('searchStatus').value;
+
+            // URL matching the multi-criteria filter pattern
+            let url = new URL(`${API_BASE}/api/medical-tests/search`);
+            if (patientId) url.searchParams.append("patientId", patientId);
+            if (testName) url.searchParams.append("testName", testName);
+            if (category) url.searchParams.append("category", category);
+            if (status) url.searchParams.append("status", status);
+
+            try {
+                const res = await fetch(url);
+                const filteredData = await res.json();
+                renderTable(filteredData);
+                document.getElementById('noDataMessage').classList.toggle('hidden', filteredData.length > 0);
+            } catch (err) {
+                console.error("Search Failed:", err);
+            }
         }
 
         function editTest(id) { window.location.href = `/medical-test-register?id=${id}`; }
@@ -161,22 +220,10 @@
         async function deleteTest(id, name) {
             if (confirm(`Warning: Confirm permanent removal of lab record for ${name}?`)) {
                 try {
-                    await fetch(`${API_BASE}/api/medical-tests/${id}`, { method: 'DELETE' });
-                    fetchTests();
+                    const res = await fetch(`${API_BASE}/api/medical-tests/${id}`, { method: 'DELETE' });
+                    if(res.ok) fetchTests();
                 } catch (err) { alert("Delete operation failed."); }
             }
-        }
-
-        function filterTests() {
-            const input = document.getElementById('testSearch').value.toLowerCase();
-            const rows = document.querySelectorAll('.test-row');
-            let found = 0;
-            rows.forEach(row => {
-                const match = row.innerText.toLowerCase().includes(input);
-                row.style.display = match ? '' : 'none';
-                if (match) found++;
-            });
-            document.getElementById('noDataMessage').style.display = found === 0 ? 'block' : 'none';
         }
     </script>
 </body>

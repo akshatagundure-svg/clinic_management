@@ -8,9 +8,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "clinics")
 public class Clinic {
-
     @Id
     private String clinicId;
+   
     // -------- BASIC INFO --------
     private String clinicName;
     private String clinicType;          // OPD / HOSPITAL / CLINIC

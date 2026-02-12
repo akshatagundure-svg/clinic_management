@@ -39,6 +39,9 @@
             </a>
             
             <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Core Management</div>
+            <a onclick="window.location.href='/clinic-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-hospital mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Clinics
+            </a>
             <a onclick="window.location.href='/doctor-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
                 <i class="fas fa-user-md mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Doctors
             </a>
@@ -69,14 +72,34 @@
                 <p class="text-slate-500 text-xs mt-1">Real-time modular metrics and central system management</p>
             </div>
             <div class="flex space-x-3">
+                <button onclick="window.location.href='/clinic-register'" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-lg shadow-indigo-100 transition-all flex items-center">
+                    <i class="fas fa-plus mr-2"></i> NEW CLINIC
+                </button>
                 <button onclick="window.location.href='/doctor-register'" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-lg shadow-blue-100 transition-all flex items-center">
-                    <i class="fas fa-plus mr-2"></i> SYSTEM INTAKE
+                    <i class="fas fa-plus mr-2"></i> NEW DOCTOR
                 </button>
             </div>
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-            
+            <div class="glass-card card-hover p-6 rounded-2xl relative overflow-hidden group border-t-4 border-t-indigo-500">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="bg-indigo-50 p-3 rounded-xl text-indigo-600"><i class="fas fa-hospital text-xl"></i></div>
+                    <span class="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-lg">Infrastructure</span>
+                </div>
+                <h3 class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Total Clinics</h3>
+                <div class="text-3xl font-bold text-slate-800 my-1" id="clinicCount">0</div>
+                
+                <div class="flex space-x-4 mt-4 pt-4 border-t border-slate-100">
+                    <button onclick="window.location.href='/clinic-register'" class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800">
+                        <i class="fas fa-plus mr-1"></i> ADD
+                    </button>
+                    <button onclick="window.location.href='/clinic-list'" class="text-[11px] font-bold text-slate-400 hover:text-slate-600 uppercase tracking-tighter">
+                        <i class="fas fa-list mr-1"></i> VIEW ALL
+                    </button>
+                </div>
+            </div>
+
             <div class="glass-card card-hover p-6 rounded-2xl relative overflow-hidden group">
                 <div class="flex justify-between items-start mb-4">
                     <div class="bg-blue-50 p-3 rounded-xl text-blue-600"><i class="fas fa-user-md text-xl"></i></div>
@@ -154,6 +177,16 @@
                     <button onclick="window.location.href='/medicine-list'" class="text-[11px] font-bold text-slate-400 hover:text-slate-600 uppercase tracking-tighter"><i class="fas fa-box mr-1"></i> INVENTORY</button>
                 </div>
             </div>
+        </div>
+
+        <div class="glass-card rounded-2xl shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h2 id="tableTitle" class="font-bold text-slate-800 tracking-tight">Recent System Activity</h2>
+            </div>
+            <table class="w-full text-left">
+                <thead id="tableHead"></thead>
+                <tbody id="mainTableBody"></tbody>
+            </table>
         </div>
     </main>
 

@@ -58,5 +58,13 @@ public String showMedicalTestRegister() {
 public String showMedicalTestList() {
     return "medical-test-list"; // Serves templates/medical-test-list.html
 }
+@GetMapping("/clinic-register")
+public String showClinicRegisterPage() {
+    return "clinic-register"; // This must match the filename in src/main/resources/templates
+}
+@GetMapping("/clinic-list")
+public String showClinicListPage() {
+    return "clinic-list";
+}
 
 }

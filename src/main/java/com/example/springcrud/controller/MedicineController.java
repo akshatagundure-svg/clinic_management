@@ -29,14 +29,47 @@ public class MedicineController {
     @Autowired
     private MedicineRepository medicineRepository;
 
-    // READ - Get all medicines
+    /**
+     * ✅ 1. FILTER - Specific path MUST come before /{id}
+     * Find medicines by combining criteria
+     * Example: /api/medicines/filter?company=Pfizer&name=Advil
+     */
+    @GetMapping("/filter")
+    public ResponseEntity<List<Medicine>> filterMedicines(
+            @RequestParam(required = false) String medId,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String company,
+            @RequestParam(required = false) String status) {
+        
+        List<Medicine> medicines = medicineRepository.findAll();
+
+        // Single Stream pipeline for better performance
+        List<Medicine> filteredMedicines = medicines.stream()
+            .filter(m -> medId == null || medId.isEmpty() || 
+                    (m.getMedId() != null && m.getMedId().equalsIgnoreCase(medId)))
+            .filter(m -> name == null || name.isEmpty() || 
+                    (m.getName() != null && m.getName().toLowerCase().contains(name.toLowerCase())))
+            .filter(m -> company == null || company.isEmpty() || 
+                    (m.getCompanyName() != null && m.getCompanyName().toLowerCase().contains(company.toLowerCase())))
+            .filter(m -> status == null || status.isEmpty() || 
+                    (m.getRecordStatus() != null && m.getRecordStatus().equalsIgnoreCase(status)))
+            .collect(Collectors.toList());
+
+        return new ResponseEntity<>(filteredMedicines, HttpStatus.OK);
+    }
+
+    /**
+     * ✅ 2. READ ALL
+     */
     @GetMapping
     public ResponseEntity<List<Medicine>> getAllMedicines() {
         List<Medicine> medicines = medicineRepository.findAll();
         return new ResponseEntity<>(medicines, HttpStatus.OK);
     }
 
-    // READ - Get medicine by ID
+    /**
+     * ✅ 3. READ BY ID - Generic dynamic path comes last
+     */
     @GetMapping("/{id}")
     public ResponseEntity<Medicine> getMedicineById(@PathVariable String id) {
         Optional<Medicine> medicine = medicineRepository.findById(id);
@@ -45,44 +78,8 @@ public class MedicineController {
     }
 
     /**
-     * FILTER - Find medicines by combining criteria
-     * Example: /api/medicines/filter?company=Pfizer&name=Advila
+     * ✅ 4. CREATE
      */
-    @GetMapping("/filter")
-    public ResponseEntity<List<Medicine>> filterMedicines(
-            @RequestParam(required = false) String medId,
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String company) {
-        
-        List<Medicine> medicines = medicineRepository.findAll();
-
-        // 1. Filter by Business ID (medId)
-        if (medId != null && !medId.isEmpty()) {
-            medicines = medicines.stream()
-                .filter(m -> m.getMedId() != null && m.getMedId().equalsIgnoreCase(medId))
-                .collect(Collectors.toList());
-        }
-
-        // 2. Filter by Name (Partial match)
-        if (name != null && !name.isEmpty()) {
-            medicines = medicines.stream()
-                .filter(m -> m.getName() != null && 
-                        m.getName().toLowerCase().contains(name.toLowerCase()))
-                .collect(Collectors.toList());
-        }
-
-        // 3. Filter by Company Name (Partial match)
-        if (company != null && !company.isEmpty()) {
-            medicines = medicines.stream()
-                .filter(m -> m.getCompanyName() != null && 
-                        m.getCompanyName().toLowerCase().contains(company.toLowerCase()))
-                .collect(Collectors.toList());
-        }
-
-        return new ResponseEntity<>(medicines, HttpStatus.OK);
-    }
-
-    // CREATE - Add a new medicine
     @PostMapping
     public ResponseEntity<Medicine> createMedicine(@RequestBody Medicine medicine) {
         try {
@@ -93,14 +90,12 @@ public class MedicineController {
         }
     }
 
-    // UPDATE - Update medicine details
+    /**
+     * ✅ 5. UPDATE
+     */
     @PutMapping("/{id}")
     public ResponseEntity<Medicine> updateMedicine(@PathVariable String id, @RequestBody Medicine medicineDetails) {
-        Optional<Medicine> medicineOptional = medicineRepository.findById(id);
-
-        if (medicineOptional.isPresent()) {
-            Medicine medicine = medicineOptional.get();
-            
+        return medicineRepository.findById(id).map(medicine -> {
             medicine.setMedId(medicineDetails.getMedId());
             medicine.setName(medicineDetails.getName());
             medicine.setCompanyName(medicineDetails.getCompanyName());
@@ -118,12 +113,12 @@ public class MedicineController {
             
             Medicine updatedMedicine = medicineRepository.save(medicine);
             return new ResponseEntity<>(updatedMedicine, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // DELETE - Remove medicine
+    /**
+     * ✅ 6. DELETE
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> deleteMedicine(@PathVariable String id) {
         try {
