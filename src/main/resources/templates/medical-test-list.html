@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>HealthFlow Pro | Laboratory Registry</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>body { font-family: 'Inter', sans-serif; } .sidebar-gradient { background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); }</style>
+</head>
+<body class="bg-[#f8fafc] text-slate-900 flex">
+    <aside class="fixed left-0 top-0 h-screen w-64 sidebar-gradient text-white shadow-2xl z-50">
+        <div class="p-6 border-b border-slate-700/50">
+            <h2 class="text-xl font-bold tracking-wider text-indigo-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+        </div>
+        <nav class="mt-6 px-4 space-y-2">
+            <a onclick="window.location.href='/dashboard'" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-slate-300 hover:bg-slate-800 transition-all cursor-pointer">
+                <i class="fas fa-chart-pie mr-3"></i> Dashboard
+            </a>
+            <a class="flex items-center px-4 py-3 text-sm font-medium rounded-lg bg-indigo-600 text-white cursor-default shadow-lg shadow-indigo-500/20">
+                <i class="fas fa-microscope mr-3"></i> Lab Registry
+            </a>
+        </nav>
+    </aside>
+
+    <main class="ml-64 p-8 w-full min-h-screen">
+        <header class="flex justify-between items-center mb-10">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Laboratory Registry</h1>
+                <p class="text-slate-500 text-sm mt-1">Comprehensive list of diagnostic tests and clinical results.</p>
+            </div>
+            <button onclick="window.location.href='/medical-test-register'" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-semibold text-sm shadow-lg transition-all">
+                <i class="fas fa-plus mr-2"></i> NEW LAB REQUEST
+            </button>
+        </header>
+
+        <div class="mb-6 relative max-w-md">
+            <i class="fas fa-search absolute left-4 top-3.5 text-slate-400"></i>
+            <input type="text" id="testSearch" onkeyup="filterTests()" placeholder="Search by Patient ID or Test Name..." class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-slate-50 border-b border-slate-100">
+                    <tr class="text-[10px] uppercase text-slate-400 font-bold tracking-widest">
+                        <th class="px-8 py-5">Patient ID</th>
+                        <th class="px-8 py-5">Test Details</th>
+                        <th class="px-8 py-5">Category</th>
+                        <th class="px-8 py-5">Price</th>
+                        <th class="px-8 py-5">Status</th>
+                        <th class="px-8 py-5 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="testTableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+            <div id="noDataMessage" class="hidden p-12 text-center text-slate-500">No lab records match your search.</div>
+        </div>
+    </main>
+
+    <script>
+        const API_BASE = "http://localhost:8080";
+
+        document.addEventListener('DOMContentLoaded', fetchTests);
+
+        async function fetchTests() {
+            try {
+                const res = await fetch(`${API_BASE}/api/medical-tests`);
+                const data = await res.json();
+                renderTable(data);
+            } catch (err) { console.error(err); }
+        }
+
+        function renderTable(tests) {
+            const body = document.getElementById('testTableBody');
+            body.innerHTML = tests.map(t => `
+                <tr class="hover:bg-slate-50 transition-colors test-row">
+                    <td class="px-8 py-5 font-mono text-xs text-indigo-600 font-bold">${t.patientId}</td>
+                    <td class="px-8 py-5">
+                        <div class="text-sm font-bold text-slate-700">${t.testName}</div>
+                        <div class="text-[10px] text-slate-400 truncate max-w-[200px]">${t.description || ''}</div>
+                    </td>
+                    <td class="px-8 py-5 text-slate-500 text-sm">${t.category}</td>
+                    <td class="px-8 py-5 font-bold text-slate-700">$${Number(t.price).toFixed(2)}</td>
+                    <td class="px-8 py-5">
+                        <span class="text-[10px] font-bold px-3 py-1 rounded-full ${t.resultStatus === 'Completed' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}">
+                            ● ${t.resultStatus}
+                        </span>
+                    </td>
+                    <td class="px-8 py-5 text-right">
+                        <div class="flex justify-end gap-3">
+                            <button onclick="editTest('${t.id}')" class="text-slate-300 hover:text-indigo-600 p-2 rounded-lg hover:bg-indigo-50"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteTest('${t.id}', '${t.testName}')" class="text-slate-300 hover:text-rose-500 p-2 rounded-lg hover:bg-rose-50"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    </td>
+                </tr>`).join('');
+        }
+
+        function editTest(id) { window.location.href = `/medical-test-register?id=${id}`; }
+
+        async function deleteTest(id, name) {
+            if (confirm(`Delete lab record for ${name}?`)) {
+                await fetch(`${API_BASE}/api/medical-tests/${id}`, { method: 'DELETE' });
+                fetchTests();
+            }
+        }
+
+        function filterTests() {
+            const input = document.getElementById('testSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('.test-row');
+            let found = 0;
+            rows.forEach(row => {
+                const match = row.innerText.toLowerCase().includes(input);
+                row.style.display = match ? '' : 'none';
+                if (match) found++;
+            });
+            document.getElementById('noDataMessage').style.display = found === 0 ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>

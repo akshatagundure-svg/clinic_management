@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthFlow Pro | SaaS HMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* THEME: Modern Clinical - Navy & Azure */
+        .sidebar-gradient { background: #0f172a; }
+        .glass-card { background: #ffffff; border: 1px solid #e2e8f0; }
+        .card-hover:hover { 
+            transform: translateY(-5px); 
+            transition: all 0.3s ease; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        /* Custom background for the whole app */
+        .app-bg {
+            background-color: #f1f5f9;
+            background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+        }
+    </style>
+</head>
+<body class="app-bg text-slate-900 overflow-x-hidden">
+
+    <aside class="sidebar-gradient fixed left-0 top-0 h-screen w-64 text-white shadow-2xl z-50">
+        <div class="p-6 text-center border-b border-slate-700/50">
+            <h2 class="text-xl font-bold tracking-wider text-blue-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+            <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1 font-semibold">Enterprise Dashboard</p>
+        </div>
+        
+        <nav class="mt-6 px-4 space-y-1">
+            <a onclick="window.location.href='/dashboard'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl bg-blue-600 text-white cursor-pointer transition-all hover:bg-blue-500 shadow-lg shadow-blue-900/20">
+                <i class="fas fa-chart-pie mr-3"></i> Dashboard Overview
+            </a>
+            
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Core Management</div>
+            <a onclick="window.location.href='/doctor-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-user-md mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Doctors
+            </a>
+            <a onclick="window.location.href='/patient-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-hospital-user mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Patients
+            </a>
+            <a onclick="window.location.href='/availability-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-clock mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Availability
+            </a>
+            
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Operations</div>
+            <a onclick="window.location.href='/prescription-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-history mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Prescriptions
+            </a>
+            <a onclick="window.location.href='/medicine-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-pills mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Pharmacy
+            </a>
+            <a onclick="window.location.href='/medical-test-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-microscope mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Lab Reports
+            </a>
+        </nav>
+    </aside>
+
+    <main class="ml-64 p-8 min-h-screen">
+        <header class="flex justify-between items-center mb-10 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Enterprise Operational Overview</h1>
+                <p class="text-slate-500 text-xs mt-1">Real-time modular metrics and central system management</p>
+            </div>
+            <div class="flex space-x-3">
+                <button onclick="window.location.href='/doctor-register'" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-lg shadow-blue-100 transition-all flex items-center">
+                    <i class="fas fa-plus mr-2"></i> SYSTEM INTAKE
+                </button>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+            
+            <div class="glass-card card-hover p-6 rounded-2xl relative overflow-hidden group">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="bg-blue-50 p-3 rounded-xl text-blue-600"><i class="fas fa-user-md text-xl"></i></div>
+                    <span class="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded-lg">Staff</span>
+                </div>
+                <h3 class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Total Doctors</h3>
+                <div class="text-3xl font-bold text-slate-800 my-1" id="docCount">0</div>
+                <div class="flex space-x-4 mt-4 pt-4 border-t border-slate-100">
+                    <button onclick="window.location.href='/doctor-register'" class="text-[11px] font-bold text-blue-600 hover:text-blue-800"><i class="fas fa-plus mr-1"></i> ADD</button>
+                    <button onclick="window.location.href='/doctor-list'" class="text-[11px] font-bold text-slate-400 hover:text-slate-600 uppercase tracking-tighter"><i class="fas fa-list mr-1"></i> VIEW ALL</button>
+                </div>
+            </div>
+
+            <div class="glass-card card-hover p-6 rounded-2xl relative overflow-hidden group">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="bg-cyan-50 p-3 rounded-xl text-cyan-600"><i class="fas fa-hospital-user text-xl"></i></div>
+                    <span class="text-[10px] font-bold text-cyan-500 bg-cyan-50 px-2 py-1 rounded-lg">Registry</span>
+                </div>
+                <h3 class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Total Patients</h3>
+                <div class="text-3xl font-bold text-slate-800 my-1" id="patCount">0</div>
+                <div class="flex space-x-4 mt-4 pt-4 border-t border-slate-100">
+                    <button onclick="window.location.href='/patient-register'" class="text-[11px] font-bold text-blue-600 hover:text-blue-800"><i class="fas fa-plus mr-1"></i> ADD</button>
+                    <button onclick="window.location.href='/patient-list'" class="text-[11px] font-bold text-slate-400 hover:text-slate-600 uppercase tracking-tighter"><i class="fas fa-list mr-1"></i> VIEW ALL</button>
+                </div>
+            </div>
+
+            <div class="glass-card card-hover p-6 rounded-2xl relative overflow-hidden group">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="bg-emerald-50 p-3 rounded-xl text-emerald-600"><i class="fas fa-clock text-xl"></i></div>
+                    <span class="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-lg">Live</span>
+                </div>
+                <h3 class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Availability</h3>
+                <div class="text-3xl font-bold text-slate-800 my-1" id="availCount">0</div>
+                <div class="flex space-x-4 mt-4 pt-4 border-t border-slate-100">
+                    <button onclick="window.location.href='/availability-register'" class="text-[11px] font-bold text-blue-600 hover:text-blue-800"><i class="fas fa-calendar-plus mr-1"></i> SET</button>
+                    <button onclick="window.location.href='/availability-list'" class="text-[11px] font-bold text-slate-400 hover:text-slate-600 uppercase tracking-tighter"><i class="fas fa-eye mr-1"></i> VIEW SLOTS</button>
+                </div>
+            </div>
+
+            <div class="glass-card card-hover p-6 rounded-2xl relative overflow-hidden group">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="bg-amber-50 p-3 rounded-xl text-amber-600"><i class="fas fa-file-prescription text-xl"></i></div>
+                    <span class="text-[10px] font-bold text-amber-500 bg-amber-50 px-2 py-1 rounded-lg">Clinical</span>
+                </div>
+                <h3 class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Active Scripts</h3>
+                <div class="text-3xl font-bold text-slate-800 my-1" id="presCount">0</div>
+                <div class="flex space-x-4 mt-4 pt-4 border-t border-slate-100">
+                    <button onclick="window.location.href='/prescription-register'" class="text-[11px] font-bold text-blue-600 hover:text-blue-800"><i class="fas fa-plus mr-1"></i> NEW</button>
+                    <button onclick="window.location.href='/prescription-list'" class="text-[11px] font-bold text-slate-400 hover:text-slate-600 uppercase tracking-tighter"><i class="fas fa-history mr-1"></i> HISTORY</button>
+                </div>
+            </div>
+
+            <div class="glass-card card-hover p-6 rounded-2xl relative overflow-hidden group border-t-4 border-t-purple-500">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="bg-purple-50 p-3 rounded-xl text-purple-600"><i class="fas fa-microscope text-xl"></i></div>
+                    <span class="text-[10px] font-bold text-purple-500 bg-purple-50 px-2 py-1 rounded-lg">Diagnostic</span>
+                </div>
+                <h3 class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Lab Reports</h3>
+                <div class="text-3xl font-bold text-slate-800 my-1" id="testCount">0</div>
+                <div class="flex space-x-4 mt-4 pt-4 border-t border-slate-100">
+                    <button onclick="window.location.href='/medical-test-register'" class="text-[11px] font-bold text-blue-600 hover:text-blue-800"><i class="fas fa-plus mr-1"></i> NEW</button>
+                    <button onclick="window.location.href='/medical-test-list'" class="text-[11px] font-bold text-slate-400 hover:text-slate-600 uppercase tracking-tighter"><i class="fas fa-list mr-1"></i> VIEW ALL</button>
+                </div>
+            </div>
+
+            <div class="glass-card card-hover p-6 rounded-2xl relative overflow-hidden group border-t-4 border-t-rose-500">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="bg-rose-50 p-3 rounded-xl text-rose-600"><i class="fas fa-pills text-xl"></i></div>
+                    <span class="text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-1 rounded-lg">Pharmacy</span>
+                </div>
+                <h3 class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Total Medicines</h3>
+                <div class="text-3xl font-bold text-slate-800 my-1" id="medsCount">0</div>
+                <div class="flex space-x-4 mt-4 pt-4 border-t border-slate-100">
+                    <button onclick="window.location.href='/medicine-register'" class="text-[11px] font-bold text-blue-600 hover:text-blue-800"><i class="fas fa-plus mr-1"></i> ADD</button>
+                    <button onclick="window.location.href='/medicine-list'" class="text-[11px] font-bold text-slate-400 hover:text-slate-600 uppercase tracking-tighter"><i class="fas fa-box mr-1"></i> INVENTORY</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/dashboard.js"></script>
+</body>
+</html>

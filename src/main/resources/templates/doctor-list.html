@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>HealthFlow Pro | Doctor Directory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-[#f8fafc] text-slate-900 flex">
+
+    <aside class="fixed left-0 top-0 h-screen w-64 bg-slate-900 text-white shadow-2xl z-50">
+        <div class="p-6">
+            <h2 class="text-xl font-bold tracking-wider text-indigo-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+        </div>
+        <nav class="mt-6 px-4 space-y-2">
+            <a onclick="window.location.href='/dashboard'" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all">
+                <i class="fas fa-chart-pie mr-3"></i> Dashboard
+            </a>
+            <a class="flex items-center px-4 py-3 text-sm font-medium rounded-lg bg-indigo-600 text-white cursor-default">
+                <i class="fas fa-user-md mr-3"></i> Doctor Directory
+            </a>
+        </nav>
+    </aside>
+
+    <main class="ml-64 p-8 w-full min-h-screen">
+        <header class="flex justify-between items-center mb-10">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Doctor Directory</h1>
+                <p class="text-slate-500 text-sm mt-1">Manage and view all registered medical professionals.</p>
+            </div>
+            <button onclick="window.location.href='/doctor-register'" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-indigo-100 transition-all">
+                <i class="fas fa-plus mr-2"></i> ADD NEW DOCTOR
+            </button>
+        </header>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                
+                <div class="relative">
+                    <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="searchName" placeholder="Search name..." 
+                        class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                </div>
+                
+                <div class="relative">
+                    <i class="fas fa-stethoscope absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="searchSpecialization" placeholder="Search specialty..." 
+                        class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                </div>
+
+                <div class="flex gap-2">
+                    <input type="number" id="minExp" placeholder="Min Exp" class="w-1/2 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                    <input type="number" id="maxExp" placeholder="Max Exp" class="w-1/2 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                </div>
+
+                <button onclick="performSearch()" class="bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-md">
+                    <i class="fas fa-filter mr-2 text-xs"></i> APPLY FILTERS
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-slate-50 border-b border-slate-100">
+                    <tr class="text-[10px] uppercase text-slate-400 font-bold tracking-widest">
+                        <th class="px-8 py-5">Full Name</th>
+                        <th class="px-8 py-5">Specialization</th>
+                        <th class="px-8 py-5 text-center">Experience</th>
+                        <th class="px-8 py-5">Contact</th>
+                        <th class="px-8 py-5 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="doctorTableBody" class="divide-y divide-slate-100">
+                    </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        const API_BASE = "http://localhost:8080/api/doctors";
+
+        async function loadDoctors() {
+            try {
+                const res = await fetch(API_BASE);
+                const doctors = await res.json();
+                renderTable(doctors);
+            } catch (err) {
+                console.error("Failed to load doctors:", err);
+            }
+        }
+
+        function renderTable(doctors) {
+            const body = document.getElementById('doctorTableBody');
+            if (doctors.length === 0) {
+                body.innerHTML = `<tr><td colspan="5" class="p-12 text-center text-slate-400 font-medium">No doctors found matching your criteria.</td></tr>`;
+                return;
+            }
+            body.innerHTML = doctors.map(d => `
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="px-8 py-5">
+                        <div class="font-semibold text-slate-700">${d.name}</div>
+                        <div class="text-[10px] text-slate-400 uppercase font-bold tracking-tighter">${d.gender || 'N/A'}</div>
+                    </td>
+                    <td class="px-8 py-5">
+                        <span class="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase">
+                            ${d.specialization}
+                        </span>
+                    </td>
+                    <td class="px-8 py-5 text-center text-slate-600 text-sm font-medium">${d.experience} Years</td>
+                    <td class="px-8 py-5 text-slate-500 text-sm font-mono tracking-tight">${d.phone}</td>
+                    <td class="px-8 py-5 text-right">
+                        <div class="flex justify-end gap-2">
+                            <button onclick="editDoctor('${d.id}')" class="text-indigo-600 hover:bg-indigo-50 w-9 h-9 flex items-center justify-center rounded-xl transition-all">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteDoctor('${d.id}', '${d.name}')" class="text-rose-600 hover:bg-rose-50 w-9 h-9 flex items-center justify-center rounded-xl transition-all">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function performSearch() {
+            const name = document.getElementById('searchName').value;
+            const spec = document.getElementById('searchSpecialization').value;
+            const minExp = document.getElementById('minExp').value;
+            const maxExp = document.getElementById('maxExp').value;
+
+            // Search endpoint you defined in DoctorController
+            let url = new URL(`${API_BASE}/search`);
+            if (name) url.searchParams.append("name", name);
+            if (spec) url.searchParams.append("specialization", spec);
+            if (minExp) url.searchParams.append("minExp", minExp);
+            if (maxExp) url.searchParams.append("maxExp", maxExp);
+
+            try {
+                const res = await fetch(url);
+                const filteredDoctors = await res.json();
+                renderTable(filteredDoctors);
+            } catch (err) {
+                console.error("Search failed:", err);
+            }
+        }
+
+        function editDoctor(id) {
+            window.location.href = `/doctor-register?id=${id}`;
+        }
+
+        async function deleteDoctor(id, name) {
+            if (confirm(`Are you sure you want to delete Dr. ${name}?`)) {
+                try {
+                    const response = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
+                    if (response.ok || response.status === 204) {
+                        performSearch(); 
+                    }
+                } catch (err) {
+                    console.error("Error deleting doctor:", err);
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadDoctors);
+    </script>
+</body>
+</html>

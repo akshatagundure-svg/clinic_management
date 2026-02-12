@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>HealthFlow Pro | Medicine Inventory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#f8fafc] text-slate-900 font-['Inter'] flex">
+
+    <aside class="fixed left-0 top-0 h-screen w-64 bg-slate-900 text-white shadow-2xl z-50">
+        <div class="p-6 border-b border-slate-800">
+            <h2 class="text-xl font-bold tracking-wider text-indigo-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+        </div>
+        <nav class="mt-6 px-4 space-y-2">
+            <a onclick="window.location.href='/dashboard'" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-slate-300 hover:bg-slate-800 transition-all cursor-pointer">
+                <i class="fas fa-chart-pie mr-3"></i> Dashboard
+            </a>
+            <a class="flex items-center px-4 py-3 text-sm font-medium rounded-lg bg-indigo-600 text-white cursor-default">
+                <i class="fas fa-pills mr-3"></i> Medicine Inventory
+            </a>
+        </nav>
+    </aside>
+
+    <main class="ml-64 p-8 w-full min-h-screen">
+        <header class="flex justify-between items-center mb-10">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Pharmacy Stock</h1>
+                <p class="text-slate-500 text-sm mt-1">Full registry of available medications and stock levels.</p>
+            </div>
+            <button onclick="window.location.href='/medicine-register'" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-semibold text-sm shadow-lg transition-all">
+                <i class="fas fa-plus mr-2"></i> ADD MEDICINE
+            </button>
+        </header>
+
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-slate-50 border-b border-slate-100">
+                    <tr class="text-[10px] uppercase text-slate-400 font-bold tracking-widest">
+                        <th class="px-8 py-5">Medicine ID</th>
+                        <th class="px-8 py-5">Name</th>
+                        <th class="px-8 py-5">Manufacturer</th>
+                        <th class="px-8 py-5">Price</th>
+                        <th class="px-8 py-5">Status</th>
+                        <th class="px-8 py-5 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="medicineTableBody" class="divide-y divide-slate-100">
+                    </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        const API_BASE = "http://localhost:8080";
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadMedicines();
+        });
+
+        /**
+         * Fetches medicines and renders the table rows
+         */
+        async function loadMedicines() {
+            try {
+                const res = await fetch(`${API_BASE}/api/medicines`);
+                const data = await res.json();
+                
+                const body = document.getElementById('medicineTableBody');
+                body.innerHTML = data.map(m => `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-8 py-5 font-mono text-xs text-indigo-600 font-bold">${m.medId || 'N/A'}</td>
+                        <td class="px-8 py-5">
+                            <div class="text-sm font-bold text-slate-700">${m.name}</div>
+                            <div class="text-[10px] text-slate-400 uppercase font-medium">${m.dosage || ''}</div>
+                        </td>
+                        <td class="px-8 py-5 text-slate-500 text-sm">${m.companyName || 'Unknown'}</td>
+                        <td class="px-8 py-5 font-bold text-slate-700">$${m.price || '0.00'}</td>
+                        <td class="px-8 py-5">
+                            <span class="text-[10px] font-bold px-3 py-1 rounded-full ${m.recordStatus === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}">
+                                ● ${m.recordStatus || 'ACTIVE'}
+                            </span>
+                        </td>
+                        <td class="px-8 py-5 text-right">
+                            <div class="flex justify-end gap-3">
+                                <button onclick="editMedicine('${m.id}')" class="text-slate-400 hover:text-indigo-600 transition-colors p-2 rounded-lg hover:bg-indigo-50">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="deleteMedicine('${m.id}', '${m.name}')" class="text-slate-400 hover:text-rose-600 transition-colors p-2 rounded-lg hover:bg-rose-50">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error("Failed to load medicines:", err);
+            }
+        }
+
+        /**
+         * Redirects to the register page with the medicine ID as a query parameter
+         */
+        function editMedicine(id) {
+            if (!id) return;
+            // Redirect to the register page with the ID in the URL
+            window.location.href = `/medicine-register?id=${id}`;
+        }
+
+        /**
+         * Handles the deletion of a medicine record
+         */
+        async function deleteMedicine(id, name) {
+            if (confirm(`Permanently remove ${name} from stock?`)) {
+                try {
+                    const res = await fetch(`${API_BASE}/api/medicines/${id}`, { 
+                        method: 'DELETE' 
+                    });
+                    
+                    if (res.ok) {
+                        alert("Medicine deleted successfully.");
+                        loadMedicines(); // Refresh the list without page reload
+                    } else {
+                        alert("Error: Could not delete record.");
+                    }
+                } catch (err) {
+                    console.error("Delete error:", err);
+                    alert("Server connection failed.");
+                }
+            }
+        }
+    </script>
+</body>
+</html>

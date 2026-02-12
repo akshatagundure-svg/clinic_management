@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>HealthFlow Pro | Patient Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#f8fafc] text-slate-900 font-['Inter'] flex">
+    <aside class="fixed left-0 top-0 h-screen w-64 bg-slate-900 text-white shadow-2xl z-50">
+        <div class="p-6 border-b border-slate-800">
+            <h2 class="text-xl font-bold tracking-wider text-indigo-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+        </div>
+        <nav class="mt-6 px-4 space-y-2">
+            <a onclick="window.location.href='/dashboard'" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all">
+                <i class="fas fa-chart-pie mr-3"></i> Dashboard
+            </a>
+            <a class="flex items-center px-4 py-3 text-sm font-medium rounded-lg bg-indigo-600 text-white cursor-default">
+                <i class="fas fa-hospital-user mr-3"></i> Patient Management
+            </a>
+        </nav>
+    </aside>
+
+    <main class="ml-64 p-8 w-full flex justify-center items-center">
+        <div class="bg-white w-full max-w-4xl rounded-2xl border border-slate-200 shadow-xl p-8 my-10">
+            <div class="mb-8">
+                <h2 id="pageTitle" class="text-2xl font-bold text-slate-800">Patient Registration</h2>
+                <p class="text-slate-500 text-sm">Create or update a comprehensive patient medical profile.</p>
+            </div>
+            
+            <form id="patientForm" class="space-y-6">
+                <div class="border-b border-slate-100 pb-6">
+                    <h3 class="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-4">Personal Details</h3>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Patient ID</label>
+                            <input type="text" id="patientId" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="PAT-1001">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Full Name</label>
+                            <input type="text" id="fullName" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="Jane Doe">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Date of Birth</label>
+                            <input type="date" id="dateOfBirth" required 
+                                   class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Gender</label>
+                            <select id="gender" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-b border-slate-100 pb-6">
+                    <h3 class="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-4">Contact & Location</h3>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Phone Number</label>
+                            <input type="text" id="phoneNumber" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Email Address</label>
+                            <input type="email" id="emailAddress" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="jane.doe@example.com">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Residential Address</label>
+                            <textarea id="residentialAddress" rows="2" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Emergency Contact</label>
+                            <input type="text" id="emergencyContact" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Blood Group</label>
+                            <select id="bloodGroup" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                                <option value="A+">A+</option><option value="A-">A-</option>
+                                <option value="B+">B+</option><option value="B-">B-</option>
+                                <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                                <option value="O+">O+</option><option value="O-">O-</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-4">Medical Profile</h3>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Height (cm)</label>
+                            <input type="number" step="0.1" id="height" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Weight (kg)</label>
+                            <input type="number" step="0.1" id="weight" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Allergies</label>
+                            <input type="text" id="allergies" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="Peanuts, Penicillin (Comma separated)">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Chronic Diseases</label>
+                            <input type="text" id="chronicDiseases" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="Diabetes, Hypertension">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 pt-6">
+                    <button type="submit" id="submitBtn" class="flex-1 bg-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all">Complete Registration</button>
+                    <button type="button" onclick="window.location.href='/dashboard'" class="px-10 py-4 rounded-xl border border-slate-200 font-bold text-slate-500 hover:bg-slate-50 transition-all">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        const API_BASE = "http://localhost:8080/api/patients";
+
+        // 1. DATA PRE-FILL LOGIC (For Edit Mode)
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const patientIdInternal = urlParams.get('id');
+
+            if (patientIdInternal) {
+                document.getElementById('pageTitle').innerText = "Update Patient Profile";
+                document.getElementById('submitBtn').innerText = "Save Changes";
+
+                try {
+                    const res = await fetch(`${API_BASE}/${patientIdInternal}`);
+                    if (res.ok) {
+                        const p = await res.json();
+                        
+                        // Mapping data to fields
+                        document.getElementById('patientId').value = p.patientId || '';
+                        document.getElementById('fullName').value = p.fullName || '';
+                        document.getElementById('dateOfBirth').value = p.dateOfBirth || '';
+                        document.getElementById('gender').value = p.gender || 'Male';
+                        document.getElementById('phoneNumber').value = p.phoneNumber || '';
+                        document.getElementById('emailAddress').value = p.emailAddress || '';
+                        document.getElementById('residentialAddress').value = p.residentialAddress || '';
+                        document.getElementById('emergencyContact').value = p.emergencyContact || '';
+                        document.getElementById('bloodGroup').value = p.bloodGroup || 'A+';
+                        document.getElementById('height').value = p.height || '';
+                        document.getElementById('weight').value = p.weight || '';
+                        
+                        // Handle Arrays for Allergies and Chronic Diseases
+                        if (p.allergies) document.getElementById('allergies').value = p.allergies.join(', ');
+                        if (p.chronicDiseases) document.getElementById('chronicDiseases').value = p.chronicDiseases.join(', ');
+                        
+                    }
+                } catch (err) {
+                    console.error("Fetch error:", err);
+                }
+            }
+        });
+
+        // 2. FORM SUBMISSION LOGIC (POST vs PUT)
+        document.getElementById('patientForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const patientIdInternal = urlParams.get('id');
+
+            const patientData = {
+                patientId: document.getElementById('patientId').value,
+                fullName: document.getElementById('fullName').value,
+                dateOfBirth: document.getElementById('dateOfBirth').value,
+                gender: document.getElementById('gender').value,
+                phoneNumber: document.getElementById('phoneNumber').value,
+                emailAddress: document.getElementById('emailAddress').value,
+                residentialAddress: document.getElementById('residentialAddress').value,
+                emergencyContact: document.getElementById('emergencyContact').value,
+                bloodGroup: document.getElementById('bloodGroup').value,
+                height: parseFloat(document.getElementById('height').value) || 0,
+                weight: parseFloat(document.getElementById('weight').value) || 0,
+                allergies: document.getElementById('allergies').value.split(',').map(s => s.trim()).filter(s => s !== ""),
+                chronicDiseases: document.getElementById('chronicDiseases').value.split(',').map(s => s.trim()).filter(s => s !== ""),
+                currentMedications: [] 
+            };
+
+            const method = patientIdInternal ? 'PUT' : 'POST';
+            const url = patientIdInternal ? `${API_BASE}/${patientIdInternal}` : API_BASE;
+
+            try {
+                const res = await fetch(url, { 
+                    method: method, 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(patientData) 
+                });
+                
+                if (res.ok) { 
+                    alert(patientIdInternal ? "Profile Updated Successfully!" : "Patient Registered Successfully!"); 
+                    window.location.href = '/dashboard'; 
+                } else {
+                    const error = await res.text();
+                    alert("Operation failed: " + error);
+                }
+            } catch (err) {
+                console.error("Submission error:", err);
+                alert("Server connection failed.");
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>HealthFlow Pro | Clinical History</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-[#f8fafc] text-slate-900 flex">
+
+    <aside class="fixed left-0 top-0 h-screen w-64 bg-slate-900 text-white shadow-2xl z-50">
+        <div class="p-6 border-b border-slate-800">
+            <h2 class="text-xl font-bold tracking-wider text-indigo-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+        </div>
+        <nav class="mt-6 px-4 space-y-1">
+            <a onclick="window.location.href='/dashboard'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all cursor-pointer">
+                <i class="fas fa-chart-pie mr-3"></i> Dashboard
+            </a>
+            <a class="flex items-center px-4 py-3 text-sm font-medium rounded-xl bg-indigo-600 text-white cursor-default">
+                <i class="fas fa-history mr-3"></i> Prescription Logs
+            </a>
+        </nav>
+    </aside>
+
+    <main class="ml-64 p-8 w-full min-h-screen">
+        <header class="flex justify-between items-center mb-10">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Prescription Registry</h1>
+                <p class="text-slate-500 text-sm mt-1">Full clinical history and active treatment records.</p>
+            </div>
+            <button onclick="window.location.href='/prescription-register'" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-semibold text-sm shadow-lg transition-all">
+                <i class="fas fa-plus mr-2"></i> NEW PRESCRIPTION
+            </button>
+        </header>
+
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-slate-50 border-b border-slate-100">
+                    <tr class="text-[10px] uppercase text-slate-400 font-bold tracking-widest">
+                        <th class="px-8 py-5">Patient ID</th>
+                        <th class="px-8 py-5">Diagnosis</th>
+                        <th class="px-8 py-5">Medications</th>
+                        <th class="px-8 py-5">Status</th>
+                        <th class="px-8 py-5 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="prescriptionTableBody" class="divide-y divide-slate-100">
+                    <tr><td colspan="5" class="p-10 text-center text-slate-400 italic">Syncing clinical records...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        const API_BASE = "http://localhost:8080";
+
+        async function loadPrescriptions() {
+            const body = document.getElementById('prescriptionTableBody');
+            try {
+                const res = await fetch(`${API_BASE}/api/prescriptions`);
+                const data = await res.json();
+                
+                if (data.length === 0) {
+                    body.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-slate-400">No records found.</td></tr>';
+                    return;
+                }
+
+                body.innerHTML = data.map(p => `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-8 py-5 font-mono text-xs text-indigo-600 font-bold">
+                            ${p.patient ? p.patient.patientId : 'N/A'}
+                        </td>
+                        <td class="px-8 py-5">
+                            <div class="text-sm font-semibold text-slate-700">
+                                ${p.diagnosis ? p.diagnosis.confirmedDiagnosis : 'Pending'}
+                            </div>
+                        </td>
+                        <td class="px-8 py-5 text-slate-500 text-xs font-medium">
+                            ${p.medications ? p.medications.length + ' item(s)' : 'None'}
+                        </td>
+                        <td class="px-8 py-5">
+                            <span class="text-[10px] font-bold px-3 py-1 rounded-full ${p.recordStatus === 'Active' ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-500'}">
+                                ${p.recordStatus || 'DRAFT'}
+                            </span>
+                        </td>
+                        <td class="px-8 py-5 text-right space-x-2">
+                            <button onclick="editPrescription('${p.id}')" class="text-indigo-600 hover:bg-indigo-50 p-2 rounded-lg transition-colors">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deletePrescription('${p.id}')" class="text-slate-300 hover:text-red-500 transition-colors">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                body.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-red-500">Sync Error.</td></tr>';
+            }
+        }
+
+        function editPrescription(id) {
+            window.location.href = `/prescription-register?id=${id}`;
+        }
+
+        async function deletePrescription(id) {
+            if(confirm('Delete this clinical record?')) {
+                const res = await fetch(`${API_BASE}/api/prescriptions/${id}`, { method: 'DELETE' });
+                if(res.ok) loadPrescriptions();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadPrescriptions);
+    </script>
+</body>
+</html>

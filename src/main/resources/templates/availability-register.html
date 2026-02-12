@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>HealthFlow Pro | Set Availability</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#f8fafc] text-slate-900 font-['Inter'] flex">
+
+    <aside class="fixed left-0 top-0 h-screen w-64 bg-slate-900 text-white shadow-2xl z-50">
+        <div class="p-6 border-b border-slate-800">
+            <h2 class="text-xl font-bold tracking-wider text-indigo-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+        </div>
+        <nav class="mt-6 px-4 space-y-2">
+            <a onclick="window.location.href='/dashboard'" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all">
+                <i class="fas fa-chart-pie mr-3"></i> Dashboard
+            </a>
+            <a class="flex items-center px-4 py-3 text-sm font-medium rounded-lg bg-indigo-600 text-white cursor-default">
+                <i class="fas fa-clock mr-3"></i> Set Availability
+            </a>
+        </nav>
+    </aside>
+
+    <main class="ml-64 p-8 w-full flex justify-center items-center">
+        <div class="bg-white w-full max-w-2xl rounded-2xl border border-slate-200 shadow-xl p-8 my-10">
+            <div class="mb-8">
+                <h2 id="pageTitle" class="text-2xl font-bold text-slate-800">Doctor Availability</h2>
+                <p class="text-slate-500 text-sm">Schedule active shifts and consultation hours for medical staff.</p>
+            </div>
+            
+            <form id="availabilityForm" class="space-y-6">
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="col-span-2">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Doctor Identifier (Business ID)</label>
+                        <input type="text" id="doctorId" required 
+                               class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" 
+                               placeholder="e.g., DOC102">
+                    </div>
+
+                    <div class="col-span-2">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Shift Day</label>
+                        <select id="day" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                            <option value="Sunday">Sunday</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Start Time</label>
+                        <input type="time" id="startTime" required 
+                               class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">End Time</label>
+                        <input type="time" id="endTime" required 
+                               class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                    </div>
+
+                    <div class="col-span-2">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Status</label>
+                        <select id="available" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                            <option value="true">Available </option>
+                            <option value="false">Unavailable </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 pt-6">
+                    <button type="submit" id="submitBtn" class="flex-1 bg-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all">
+                        Save Schedule
+                    </button>
+                    <button type="button" onclick="window.location.href='/availability-list'" 
+                            class="px-10 py-4 rounded-xl border border-slate-200 font-bold text-slate-500 hover:bg-slate-50 transition-all">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api/doctor-availability';
+        
+        // 1. Check for Edit Mode on Load
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const scheduleId = urlParams.get('id');
+
+            if (scheduleId) {
+                document.getElementById('pageTitle').innerText = "Update Availability";
+                document.getElementById('submitBtn').innerText = "Update Schedule";
+
+                try {
+                    const res = await fetch(`${API_BASE}/${scheduleId}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        // Fill form fields
+                        document.getElementById('doctorId').value = data.doctorId;
+                        document.getElementById('day').value = data.day;
+                        document.getElementById('startTime').value = data.startTime;
+                        document.getElementById('endTime').value = data.endTime;
+                        document.getElementById('available').value = data.available.toString();
+                    }
+                } catch (err) {
+                    console.error("Error fetching schedule:", err);
+                }
+            }
+        });
+
+        // 2. Handle Form Submission (POST or PUT)
+        document.getElementById('availabilityForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const scheduleId = urlParams.get('id');
+
+            const availabilityData = {
+                doctorId: document.getElementById('doctorId').value,
+                day: document.getElementById('day').value,
+                startTime: document.getElementById('startTime').value,
+                endTime: document.getElementById('endTime').value,
+                available: document.getElementById('available').value === 'true'
+            };
+
+            const method = scheduleId ? 'PUT' : 'POST';
+            const url = scheduleId ? `${API_BASE}/${scheduleId}` : API_BASE;
+
+            try {
+                const res = await fetch(url, { 
+                    method: method, 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(availabilityData) 
+                });
+                
+                if (res.ok) { 
+                    alert(scheduleId ? "Schedule updated successfully!" : "Availability set successfully!"); 
+                    window.location.href = '/availability-list'; 
+                } else {
+                    const errorMsg = await res.text();
+                    alert("Operation failed: " + errorMsg);
+                }
+            } catch (err) {
+                console.error("Submission error:", err);
+                alert("Connection failed. Check backend.");
+            }
+        });
+    </script>
+</body>
+</html>
