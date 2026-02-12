@@ -20,18 +20,32 @@ public class Doctor {
     private List<String> qualification;
     private String gender;
     private String phone;
+    
+    private String email;
+    private Double consultationFee;
+    private String availability;
+    private String hospitalName;
+    // rating field removed
+    private String address;
 
     // Default Constructor
     public Doctor() {}
 
-    // Parameterized Constructor for convenience
-    public Doctor(String name, String specialization, Integer experience, List<String> qualification, String gender, String phone) {
+    // Updated Parameterized Constructor (rating removed)
+    public Doctor(String name, String specialization, Integer experience, List<String> qualification, 
+                  String gender, String phone, String email, Double consultationFee, 
+                  String availability, String hospitalName, String address) {
         this.name = name;
         this.specialization = specialization;
         this.experience = experience;
         this.qualification = qualification;
         this.gender = gender;
         this.phone = phone;
+        this.email = email;
+        this.consultationFee = consultationFee;
+        this.availability = availability;
+        this.hospitalName = hospitalName;
+        this.address = address;
     }
 
     // -------- Getters & Setters --------
@@ -57,8 +71,29 @@ public class Doctor {
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
 
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public Double getConsultationFee() { return consultationFee; }
+    public void setConsultationFee(Double consultationFee) { this.consultationFee = consultationFee; }
+
+    public String getAvailability() { return availability; }
+    public void setAvailability(String availability) { this.availability = availability; }
+
+    public String getHospitalName() { return hospitalName; }
+    public void setHospitalName(String hospitalName) { this.hospitalName = hospitalName; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+
     @Override
     public String toString() {
-        return "Doctor{" + "id='" + id + '\'' + ", name='" + name + '\'' + ", spec='" + specialization + '\'' + '}';
+        return "Doctor{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", specialization='" + specialization + '\'' +
+                ", hospitalName='" + hospitalName + '\'' +
+                ", email='" + email + '\'' +
+                '}';
     }
 }

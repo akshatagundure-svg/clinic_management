@@ -2,58 +2,93 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>HealthFlow Pro | Laboratory Registry</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthFlow Pro | Lab Registry</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>body { font-family: 'Inter', sans-serif; } .sidebar-gradient { background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); }</style>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-gradient { background: #0f172a; }
+        .app-bg {
+            background-color: #f1f5f9;
+            background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+        }
+        .glass-card { background: #ffffff; border: 1px solid #e2e8f0; }
+    </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-900 flex">
-    <aside class="fixed left-0 top-0 h-screen w-64 sidebar-gradient text-white shadow-2xl z-50">
-        <div class="p-6 border-b border-slate-700/50">
-            <h2 class="text-xl font-bold tracking-wider text-indigo-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+<body class="app-bg text-slate-900 flex">
+
+    <aside class="sidebar-gradient fixed left-0 top-0 h-screen w-64 text-white shadow-2xl z-50">
+        <div class="p-6 text-center border-b border-slate-700/50">
+            <h2 class="text-xl font-bold tracking-wider text-blue-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+            <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1 font-semibold">Enterprise Dashboard</p>
         </div>
-        <nav class="mt-6 px-4 space-y-2">
-            <a onclick="window.location.href='/dashboard'" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-slate-300 hover:bg-slate-800 transition-all cursor-pointer">
-                <i class="fas fa-chart-pie mr-3"></i> Dashboard
+        
+        <nav class="mt-6 px-4 space-y-1">
+            <a onclick="window.location.href='/dashboard'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl bg-blue-600 text-white cursor-pointer transition-all hover:bg-blue-500 shadow-lg shadow-blue-900/20">
+                <i class="fas fa-chart-pie mr-3"></i> Dashboard Overview
             </a>
-            <a class="flex items-center px-4 py-3 text-sm font-medium rounded-lg bg-indigo-600 text-white cursor-default shadow-lg shadow-indigo-500/20">
-                <i class="fas fa-microscope mr-3"></i> Lab Registry
+            
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Core Management</div>
+            <a onclick="window.location.href='/doctor-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-user-md mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Doctors
+            </a>
+            <a onclick="window.location.href='/patient-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-hospital-user mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Patients
+            </a>
+            <a onclick="window.location.href='/availability-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-clock mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Availability
+            </a>
+            
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Operations</div>
+            <a onclick="window.location.href='/prescription-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-history mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Prescriptions
+            </a>
+            <a onclick="window.location.href='/medicine-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-pills mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Pharmacy
+            </a>
+            <a onclick="window.location.href='/medical-test-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-microscope mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Lab Reports
             </a>
         </nav>
     </aside>
 
     <main class="ml-64 p-8 w-full min-h-screen">
-        <header class="flex justify-between items-center mb-10">
+        <header class="flex justify-between items-center mb-10 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
             <div>
-                <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Laboratory Registry</h1>
-                <p class="text-slate-500 text-sm mt-1">Comprehensive list of diagnostic tests and clinical results.</p>
+                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Laboratory Registry</h1>
+                <p class="text-slate-500 text-xs mt-1">Audit diagnostic workflows and enterprise clinical results</p>
             </div>
-            <button onclick="window.location.href='/medical-test-register'" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-semibold text-sm shadow-lg transition-all">
+            <button onclick="window.location.href='/medical-test-register'" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-lg shadow-blue-100 transition-all flex items-center">
                 <i class="fas fa-plus mr-2"></i> NEW LAB REQUEST
             </button>
         </header>
 
-        <div class="mb-6 relative max-w-md">
-            <i class="fas fa-search absolute left-4 top-3.5 text-slate-400"></i>
-            <input type="text" id="testSearch" onkeyup="filterTests()" placeholder="Search by Patient ID or Test Name..." class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+        <div class="mb-8 relative max-w-md">
+            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input type="text" id="testSearch" onkeyup="filterTests()" placeholder="Search by Patient ID or Test Name..." 
+                class="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm">
         </div>
 
-        <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-            <table class="w-full text-left">
+        <div class="glass-card rounded-2xl shadow-sm overflow-hidden">
+            <table class="w-full text-left border-collapse">
                 <thead class="bg-slate-50 border-b border-slate-100">
                     <tr class="text-[10px] uppercase text-slate-400 font-bold tracking-widest">
                         <th class="px-8 py-5">Patient ID</th>
                         <th class="px-8 py-5">Test Details</th>
                         <th class="px-8 py-5">Category</th>
-                        <th class="px-8 py-5">Price</th>
-                        <th class="px-8 py-5">Status</th>
+                        <th class="px-8 py-5">Service Fee</th>
+                        <th class="px-8 py-5">Clinical Status</th>
                         <th class="px-8 py-5 text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody id="testTableBody" class="divide-y divide-slate-100"></tbody>
+                <tbody id="testTableBody" class="divide-y divide-slate-100 bg-white text-sm">
+                    <tr><td colspan="6" class="p-12 text-center text-slate-400 italic">Synchronizing laboratory records...</td></tr>
+                </tbody>
             </table>
-            <div id="noDataMessage" class="hidden p-12 text-center text-slate-500">No lab records match your search.</div>
+            <div id="noDataMessage" class="hidden p-12 text-center text-slate-500 font-medium italic">No laboratory records found matching your search criteria.</div>
         </div>
     </main>
 
@@ -67,40 +102,68 @@
                 const res = await fetch(`${API_BASE}/api/medical-tests`);
                 const data = await res.json();
                 renderTable(data);
-            } catch (err) { console.error(err); }
+            } catch (err) { 
+                console.error("Sync Error:", err);
+                document.getElementById('testTableBody').innerHTML = '<tr><td colspan="6" class="p-12 text-center text-rose-500 font-bold">Registry Sync Failed.</td></tr>';
+            }
         }
 
         function renderTable(tests) {
             const body = document.getElementById('testTableBody');
-            body.innerHTML = tests.map(t => `
-                <tr class="hover:bg-slate-50 transition-colors test-row">
-                    <td class="px-8 py-5 font-mono text-xs text-indigo-600 font-bold">${t.patientId}</td>
+            if (tests.length === 0) {
+                body.innerHTML = '<tr><td colspan="6" class="p-12 text-center text-slate-400 italic">No diagnostic records available.</td></tr>';
+                return;
+            }
+            body.innerHTML = tests.map(t => {
+                let statusStyle = "bg-amber-50 text-amber-600 border border-amber-100";
+                if (t.resultStatus === 'Completed') statusStyle = "bg-emerald-50 text-emerald-600 border border-emerald-100";
+                if (t.resultStatus === 'Cancelled') statusStyle = "bg-slate-100 text-slate-500";
+
+                return `
+                <tr class="hover:bg-slate-50/50 transition-colors test-row">
                     <td class="px-8 py-5">
-                        <div class="text-sm font-bold text-slate-700">${t.testName}</div>
-                        <div class="text-[10px] text-slate-400 truncate max-w-[200px]">${t.description || ''}</div>
+                        <span class="font-mono text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-md border border-blue-100">
+                            ${t.patientId}
+                        </span>
                     </td>
-                    <td class="px-8 py-5 text-slate-500 text-sm">${t.category}</td>
-                    <td class="px-8 py-5 font-bold text-slate-700">$${Number(t.price).toFixed(2)}</td>
                     <td class="px-8 py-5">
-                        <span class="text-[10px] font-bold px-3 py-1 rounded-full ${t.resultStatus === 'Completed' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}">
+                        <div class="font-bold text-slate-700">${t.testName}</div>
+                        <div class="text-[10px] text-slate-400 font-medium truncate max-w-[180px]" title="${t.description || ''}">
+                            ${t.description || 'No description provided'}
+                        </div>
+                    </td>
+                    <td class="px-8 py-5 text-slate-600 font-medium text-xs">
+                        <span class="bg-slate-100 px-2 py-1 rounded text-[10px] uppercase tracking-tighter">${t.category}</span>
+                    </td>
+                    <td class="px-8 py-5 font-bold text-slate-700 text-xs">
+                        $${Number(t.price).toFixed(2)}
+                    </td>
+                    <td class="px-8 py-5">
+                        <span class="text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-tighter ${statusStyle}">
                             ● ${t.resultStatus}
                         </span>
                     </td>
                     <td class="px-8 py-5 text-right">
-                        <div class="flex justify-end gap-3">
-                            <button onclick="editTest('${t.id}')" class="text-slate-300 hover:text-indigo-600 p-2 rounded-lg hover:bg-indigo-50"><i class="fas fa-edit"></i></button>
-                            <button onclick="deleteTest('${t.id}', '${t.testName}')" class="text-slate-300 hover:text-rose-500 p-2 rounded-lg hover:bg-rose-50"><i class="fas fa-trash-alt"></i></button>
+                        <div class="flex justify-end gap-2">
+                            <button onclick="editTest('${t.id}')" class="text-blue-600 hover:bg-blue-50 w-8 h-8 flex items-center justify-center rounded-lg transition-all">
+                                <i class="fas fa-edit text-xs"></i>
+                            </button>
+                            <button onclick="deleteTest('${t.id}', '${t.testName}')" class="text-rose-500 hover:bg-rose-50 w-8 h-8 flex items-center justify-center rounded-lg transition-all">
+                                <i class="fas fa-trash-alt text-xs"></i>
+                            </button>
                         </div>
                     </td>
-                </tr>`).join('');
+                </tr>`}).join('');
         }
 
         function editTest(id) { window.location.href = `/medical-test-register?id=${id}`; }
 
         async function deleteTest(id, name) {
-            if (confirm(`Delete lab record for ${name}?`)) {
-                await fetch(`${API_BASE}/api/medical-tests/${id}`, { method: 'DELETE' });
-                fetchTests();
+            if (confirm(`Warning: Confirm permanent removal of lab record for ${name}?`)) {
+                try {
+                    await fetch(`${API_BASE}/api/medical-tests/${id}`, { method: 'DELETE' });
+                    fetchTests();
+                } catch (err) { alert("Delete operation failed."); }
             }
         }
 

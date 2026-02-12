@@ -10,32 +10,49 @@ import com.example.springcrud.model.Doctor;
 @Repository
 public interface DoctorRepository extends MongoRepository<Doctor, String> {
 
-    // --- Standard Query Methods ---
+    // --- Original Query Methods ---
 
-    // Search by Specialization (Exact match, Case-Insensitive)
     List<Doctor> findBySpecializationIgnoreCase(String specialization);
 
-    // Search by Name (Partial match, Case-Insensitive)
     List<Doctor> findByNameContainingIgnoreCase(String name);
 
-    // Search for a specific qualification within the List<String>
     List<Doctor> findByQualificationContainingIgnoreCase(String qualification);
 
-    // Find Doctors with experience greater than or equal to a value
     List<Doctor> findByExperienceGreaterThanEqual(Integer experience);
 
-    // Filter by Gender (Exact match)
     List<Doctor> findByGenderIgnoreCase(String gender);
 
-    // Search by Phone Number
     List<Doctor> findByPhone(String phone);
 
+    // --- New Field Query Methods ---
+
+    // Search by Hospital (Partial match, Case-Insensitive)
+    List<Doctor> findByHospitalNameContainingIgnoreCase(String hospitalName);
+
+    // Search by Availability (e.g., "AVAILABLE", "ON_LEAVE")
+    List<Doctor> findByAvailabilityIgnoreCase(String availability);
+
+    // Find by Email (Exact match for login or identification)
+    List<Doctor> findByEmailIgnoreCase(String email);
+
+    // Range Filter: Consultation Fee (Find doctors cheaper than or equal to a price)
+    List<Doctor> findByConsultationFeeLessThanEqual(Double maxFee);
+
     // --- Combined Filter Support ---
+
+    /**
+     * Updated to include Hospital Name in the search logic.
+     */
+    List<Doctor> findByNameContainingIgnoreCaseAndSpecializationIgnoreCaseAndHospitalNameContainingIgnoreCase(
+            String name, String specialization, String hospitalName);
+
+    /**
+     * Check if a phone number exists (useful for validation during registration)
+     */
+    boolean existsByPhone(String phone);
     
     /**
-     * This method allows you to filter by Name, Specialization, AND Experience simultaneously.
-     * Use this in your Controller to handle complex "Filter Sidebar" logic.
+     * Check if an email exists
      */
-    List<Doctor> findByNameContainingIgnoreCaseAndSpecializationIgnoreCaseAndExperienceGreaterThanEqual(
-            String name, String specialization, Integer experience);
+    boolean existsByEmail(String email);
 }

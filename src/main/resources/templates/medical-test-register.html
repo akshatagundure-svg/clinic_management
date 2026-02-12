@@ -2,75 +2,128 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HealthFlow Pro | Lab Intake</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>body { font-family: 'Inter', sans-serif; } .sidebar-gradient { background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); }</style>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-gradient { background: #0f172a; }
+        .app-bg {
+            background-color: #f1f5f9;
+            background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+        }
+        .glass-card { background: #ffffff; border: 1px solid #e2e8f0; }
+        .section-tag { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #3b82f6; }
+    </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-900 flex">
+<body class="app-bg text-slate-900 flex">
+
     <aside class="sidebar-gradient fixed left-0 top-0 h-screen w-64 text-white shadow-2xl z-50">
         <div class="p-6 text-center border-b border-slate-700/50">
-            <h2 class="text-xl font-bold tracking-wider text-indigo-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+            <h2 class="text-xl font-bold tracking-wider text-blue-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+            <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1 font-semibold">Enterprise Dashboard</p>
         </div>
+        
         <nav class="mt-6 px-4 space-y-1">
-            <a onclick="window.location.href='/dashboard'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all cursor-pointer">
+            <a onclick="window.location.href='/dashboard'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl bg-blue-600 text-white cursor-pointer transition-all hover:bg-blue-500 shadow-lg shadow-blue-900/20">
                 <i class="fas fa-chart-pie mr-3"></i> Dashboard Overview
             </a>
-            <a onclick="window.location.href='/medical-test-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all cursor-pointer">
-                <i class="fas fa-list mr-3"></i> Lab Registry
+            
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Core Management</div>
+            <a onclick="window.location.href='/doctor-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-user-md mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Doctors
+            </a>
+            <a onclick="window.location.href='/patient-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-hospital-user mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Patients
+            </a>
+            <a onclick="window.location.href='/availability-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-clock mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Availability
+            </a>
+            
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Operations</div>
+            <a onclick="window.location.href='/prescription-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-history mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Prescriptions
+            </a>
+            <a onclick="window.location.href='/medicine-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-pills mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Pharmacy
+            </a>
+            <a onclick="window.location.href='/medical-test-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-microscope mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Lab Reports
             </a>
         </nav>
     </aside>
 
-    <main class="ml-64 p-8 w-full min-h-screen flex justify-center items-start">
-        <div class="bg-white w-full max-w-4xl rounded-3xl border border-slate-200 shadow-xl p-8 my-4">
-            <div class="mb-8 border-b border-slate-100 pb-6">
-                <h1 id="pageTitle" class="text-2xl font-bold text-slate-800 tracking-tight">New Laboratory Record</h1>
-                <p class="text-slate-500 text-sm mt-1">Register or update diagnostic test results.</p>
+    <main class="ml-64 p-8 w-full flex flex-col items-center">
+        <header class="w-full max-w-4xl flex justify-between items-center mb-10 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div>
+                <h1 id="pageTitle" class="text-2xl font-bold text-slate-800 tracking-tight">Laboratory Record Intake</h1>
+                <p class="text-slate-500 text-xs mt-1">Register new diagnostic test results or update existing clinical reports</p>
             </div>
-            
-            <form id="medicalTestForm" class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <div class="space-y-2">
-                    <label class="block text-xs font-bold text-slate-500 uppercase">Patient ID</label>
-                    <input type="text" id="patientId" required class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-500">
-                </div>
-                <div class="space-y-2">
-                    <label class="block text-xs font-bold text-slate-500 uppercase">Doctor ID</label>
-                    <input type="text" id="doctorId" required class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-500">
-                </div>
-                <div class="space-y-2">
-                    <label class="block text-xs font-bold text-slate-500 uppercase">Test Name</label>
-                    <input type="text" id="testName" required class="w-full px-4 py-3 rounded-xl border border-slate-200">
-                </div>
-                <div class="space-y-2">
-                    <label class="block text-xs font-bold text-slate-500 uppercase">Category</label>
-                    <input type="text" id="category" required class="w-full px-4 py-3 rounded-xl border border-slate-200">
-                </div>
-                <div class="space-y-2">
-                    <label class="block text-xs font-bold text-slate-500 uppercase">Price ($)</label>
-                    <input type="number" step="0.01" id="price" required class="w-full px-4 py-3 rounded-xl border border-slate-200">
-                </div>
-                <div class="space-y-2">
-                    <label class="block text-xs font-bold text-slate-500 uppercase">Status</label>
-                    <select id="resultStatus" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white">
-                        <option value="Pending">Pending</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Cancelled">Cancelled</option>
-                    </select>
-                </div>
-                <div class="col-span-full">
-                    <label class="block text-xs font-bold text-slate-500 uppercase">Description</label>
-                    <textarea id="description" rows="2" class="w-full px-4 py-3 rounded-xl border border-slate-200"></textarea>
-                </div>
-                <div class="col-span-full">
-                    <label class="block text-xs font-bold text-slate-500 uppercase">Clinical Notes</label>
-                    <textarea id="history" rows="3" class="w-full px-4 py-3 rounded-xl border border-slate-200 font-mono text-sm"></textarea>
+        </header>
+
+        <div class="glass-card w-full max-w-4xl rounded-3xl shadow-xl p-10 mb-10">
+            <form id="medicalTestForm" class="space-y-10">
+                
+                <div>
+                    <h3 class="section-tag mb-6 border-l-4 border-blue-500 pl-3">Record Identification</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Patient ID</label>
+                            <input type="text" id="patientId" required class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all font-mono text-sm" placeholder="PAT-0000">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Doctor ID</label>
+                            <input type="text" id="doctorId" required class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all font-mono text-sm" placeholder="DOC-000">
+                        </div>
+                    </div>
                 </div>
 
-                <div class="col-span-full flex gap-4 pt-6">
-                    <button type="submit" id="submitBtn" class="flex-1 bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 transition-all">Save Record</button>
-                    <button type="button" onclick="window.history.back()" class="px-10 py-4 rounded-2xl border border-slate-200 font-bold text-slate-500">Cancel</button>
+                <div>
+                    <h3 class="section-tag mb-6 border-l-4 border-blue-500 pl-3">Test Specification</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Test Name</label>
+                            <input type="text" id="testName" required class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="e.g., Blood Glucose Level">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Diagnostic Category</label>
+                            <input type="text" id="category" required class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="e.g., Biochemistry">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Service Price ($)</label>
+                            <input type="number" step="0.01" id="price" required class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Result Status</label>
+                            <select id="resultStatus" class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                                <option value="Pending">Pending Collection</option>
+                                <option value="Completed">Completed / Published</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="section-tag mb-6 border-l-4 border-blue-500 pl-3">Laboratory Observations</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Brief Description</label>
+                            <textarea id="description" rows="2" class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Enter test purpose or summary..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Clinical Notes & History</label>
+                            <textarea id="history" rows="4" class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all font-mono text-sm" placeholder="Paste raw results or detailed observations here..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 pt-6">
+                    <button type="submit" id="submitBtn" class="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all">Commit Record</button>
+                    <button type="button" onclick="window.history.back()" class="px-12 py-4 rounded-2xl border border-slate-200 font-bold text-slate-400 hover:bg-slate-50 transition-all">Cancel</button>
                 </div>
             </form>
         </div>
@@ -84,16 +137,16 @@
         document.addEventListener('DOMContentLoaded', () => {
             if (editId) {
                 document.getElementById('pageTitle').innerText = "Update Laboratory Record";
-                document.getElementById('submitBtn').innerText = "Save Changes";
+                document.getElementById('submitBtn').innerText = "Update Enterprise Record";
                 fetch(`${API_BASE}/${editId}`)
                     .then(res => res.json())
                     .then(data => {
-                        document.getElementById('patientId').value = data.patientId;
-                        document.getElementById('doctorId').value = data.doctorId;
-                        document.getElementById('testName').value = data.testName;
-                        document.getElementById('category').value = data.category;
-                        document.getElementById('price').value = data.price;
-                        document.getElementById('resultStatus').value = data.resultStatus;
+                        document.getElementById('patientId').value = data.patientId || '';
+                        document.getElementById('doctorId').value = data.doctorId || '';
+                        document.getElementById('testName').value = data.testName || '';
+                        document.getElementById('category').value = data.category || '';
+                        document.getElementById('price').value = data.price || 0;
+                        document.getElementById('resultStatus').value = data.resultStatus || 'Pending';
                         document.getElementById('description').value = data.description || '';
                         document.getElementById('history').value = data.history || '';
                     });
@@ -123,10 +176,10 @@
                     body: JSON.stringify(data)
                 });
                 if (res.ok) {
-                    alert("Success!");
+                    alert(editId ? "Enterprise Record Updated!" : "Lab Record Registered!");
                     window.location.href = '/medical-test-list';
                 }
-            } catch (err) { alert("Fail!"); }
+            } catch (err) { alert("System communication error."); }
         });
     </script>
 </body>

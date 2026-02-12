@@ -22,15 +22,12 @@ import com.example.springcrud.repository.DoctorRepository;
 
 @RestController
 @RequestMapping("/api/doctors")
-@CrossOrigin(origins = "*") // Allows your frontend to communicate with this backend
+@CrossOrigin(origins = "*")
 public class DoctorController {
 
     @Autowired
     private DoctorRepository doctorRepository;
 
-    // =========================
-    // CREATE
-    // =========================
     @PostMapping
     public ResponseEntity<Doctor> create(@RequestBody Doctor doctor) {
         try {
@@ -41,17 +38,11 @@ public class DoctorController {
         }
     }
 
-    // =========================
-    // READ ALL
-    // =========================
     @GetMapping
     public List<Doctor> getAll() {
         return doctorRepository.findAll();
     }
 
-    // =========================
-    // READ BY ID
-    // =========================
     @GetMapping("/{id}")
     public ResponseEntity<Doctor> getById(@PathVariable String id) {
         return doctorRepository.findById(id)
@@ -59,28 +50,31 @@ public class DoctorController {
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // =========================
-    // UPDATE (Handles both Full and Partial Updates)
-    // =========================
+    // =====================================================
+    // UPDATE (Updated with NEW fields)
+    // =====================================================
     @PutMapping("/{id}")
     public ResponseEntity<Doctor> update(@PathVariable String id, @RequestBody Doctor newData) {
         return doctorRepository.findById(id).map(existingDoctor -> {
-            // Only update fields if they are provided in the RequestBody (Prevents nulling out data)
             if (newData.getName() != null) existingDoctor.setName(newData.getName());
             if (newData.getSpecialization() != null) existingDoctor.setSpecialization(newData.getSpecialization());
             if (newData.getExperience() != null) existingDoctor.setExperience(newData.getExperience());
             if (newData.getQualification() != null) existingDoctor.setQualification(newData.getQualification());
             if (newData.getGender() != null) existingDoctor.setGender(newData.getGender());
             if (newData.getPhone() != null) existingDoctor.setPhone(newData.getPhone());
+            
+            // New fields update logic
+            if (newData.getEmail() != null) existingDoctor.setEmail(newData.getEmail());
+            if (newData.getConsultationFee() != null) existingDoctor.setConsultationFee(newData.getConsultationFee());
+            if (newData.getAvailability() != null) existingDoctor.setAvailability(newData.getAvailability());
+            if (newData.getHospitalName() != null) existingDoctor.setHospitalName(newData.getHospitalName());
+            if (newData.getAddress() != null) existingDoctor.setAddress(newData.getAddress());
 
             Doctor updated = doctorRepository.save(existingDoctor);
             return new ResponseEntity<>(updated, HttpStatus.OK);
         }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // =========================
-    // DELETE
-    // =========================
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable String id) {
         if (!doctorRepository.existsById(id)) {
@@ -91,72 +85,53 @@ public class DoctorController {
     }
 
     // =====================================================
-    // 🔍 ADVANCED FILTER API
+    // 🔍 ADVANCED FILTER API (Updated for NEW fields)
     // =====================================================
     @GetMapping("/search")
     public List<Doctor> searchDoctors(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String specialization,
-            @RequestParam(required = false) String gender,
-            @RequestParam(required = false) String phone,
-            @RequestParam(required = false) String qualification,
+            @RequestParam(required = false) String hospitalName,
+            @RequestParam(required = false) Double maxFee, // New filter
+            @RequestParam(required = false) String availability,
             @RequestParam(required = false) Integer minExp,
-            @RequestParam(required = false) Integer maxExp,
             @RequestParam(required = false) String sortBy,
             @RequestParam(defaultValue = "asc") String order
     ) {
         List<Doctor> list = doctorRepository.findAll();
 
-        // Filter by Name (Case-Insensitive)
         if (name != null && !name.isEmpty()) {
-            list = list.stream()
-                    .filter(d -> d.getName() != null && d.getName().toLowerCase().contains(name.toLowerCase()))
-                    .collect(Collectors.toList());
+            list = list.stream().filter(d -> d.getName() != null && d.getName().toLowerCase().contains(name.toLowerCase())).collect(Collectors.toList());
         }
 
-        // Filter by Specialization
         if (specialization != null && !specialization.isEmpty()) {
-            list = list.stream()
-                    .filter(d -> d.getSpecialization() != null && d.getSpecialization().equalsIgnoreCase(specialization))
-                    .collect(Collectors.toList());
+            list = list.stream().filter(d -> d.getSpecialization() != null && d.getSpecialization().equalsIgnoreCase(specialization)).collect(Collectors.toList());
         }
 
-        // Filter by Gender
-        if (gender != null) {
-            list = list.stream()
-                    .filter(d -> d.getGender() != null && d.getGender().equalsIgnoreCase(gender))
-                    .collect(Collectors.toList());
+        if (hospitalName != null && !hospitalName.isEmpty()) {
+            list = list.stream().filter(d -> d.getHospitalName() != null && d.getHospitalName().toLowerCase().contains(hospitalName.toLowerCase())).collect(Collectors.toList());
         }
 
-        // Filter by Phone
-        if (phone != null) {
-            list = list.stream()
-                    .filter(d -> d.getPhone() != null && d.getPhone().contains(phone))
-                    .collect(Collectors.toList());
+        if (availability != null) {
+            list = list.stream().filter(d -> d.getAvailability() != null && d.getAvailability().equalsIgnoreCase(availability)).collect(Collectors.toList());
         }
 
-        // Filter by Qualification List
-        if (qualification != null) {
-            list = list.stream()
-                    .filter(d -> d.getQualification() != null && 
-                            d.getQualification().stream().anyMatch(q -> q.equalsIgnoreCase(qualification)))
-                    .collect(Collectors.toList());
+        if (maxFee != null) {
+            list = list.stream().filter(d -> d.getConsultationFee() != null && d.getConsultationFee() <= maxFee).collect(Collectors.toList());
         }
 
-        // Range Filter: Experience
         if (minExp != null) {
             list = list.stream().filter(d -> d.getExperience() != null && d.getExperience() >= minExp).collect(Collectors.toList());
         }
-        if (maxExp != null) {
-            list = list.stream().filter(d -> d.getExperience() != null && d.getExperience() <= maxExp).collect(Collectors.toList());
-        }
 
-        // Sorting Logic
+        // Updated Sorting Logic
         if (sortBy != null) {
             if (sortBy.equalsIgnoreCase("name")) {
                 list.sort((a, b) -> a.getName().compareToIgnoreCase(b.getName()));
             } else if (sortBy.equalsIgnoreCase("experience")) {
                 list.sort((a, b) -> Integer.compare(a.getExperience(), b.getExperience()));
+            } else if (sortBy.equalsIgnoreCase("fee")) {
+                list.sort((a, b) -> Double.compare(a.getConsultationFee(), b.getConsultationFee()));
             }
             
             if (order.equalsIgnoreCase("desc")) {
@@ -167,22 +142,8 @@ public class DoctorController {
         return list;
     }
 
-    // =========================
-    // DASHBOARD METRICS
-    // =========================
     @GetMapping("/count")
     public long getCount() {
         return doctorRepository.count();
-    }
-
-    // =========================
-    // VALIDATION: EXISTS BY PHONE
-    // =========================
-    @GetMapping("/exists/phone")
-    public boolean existsByPhone(@RequestParam String phone) {
-        // Optimization: Use a repository custom method like existsByPhone(phone) 
-        // if your DB supports it, otherwise this stream works for small datasets.
-        return doctorRepository.findAll().stream()
-                .anyMatch(d -> d.getPhone() != null && d.getPhone().equals(phone));
     }
 }

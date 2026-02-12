@@ -2,66 +2,136 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HealthFlow Pro | Doctor Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-gradient { background: #0f172a; }
+        .app-bg {
+            background-color: #f1f5f9;
+            background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+        }
+        .glass-card { background: #ffffff; border: 1px solid #e2e8f0; }
+    </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-900 font-['Inter'] flex">
-    <aside class="fixed left-0 top-0 h-screen w-64 bg-slate-900 text-white shadow-2xl z-50">
-        <div class="p-6">
-            <h2 class="text-xl font-bold tracking-wider text-indigo-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+<body class="app-bg text-slate-900 flex">
+
+    <aside class="sidebar-gradient fixed left-0 top-0 h-screen w-64 text-white shadow-2xl z-50">
+        <div class="p-6 text-center border-b border-slate-700/50">
+            <h2 class="text-xl font-bold tracking-wider text-blue-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+            <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1 font-semibold">Enterprise Dashboard</p>
         </div>
-        <nav class="mt-6 px-4 space-y-2">
-            <a onclick="window.location.href='/dashboard'" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all">
-                <i class="fas fa-chart-pie mr-3"></i> Dashboard
+        
+        <nav class="mt-6 px-4 space-y-1">
+            <a onclick="window.location.href='/dashboard'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-chart-pie mr-3 text-blue-400"></i> Dashboard Overview
             </a>
-            <a class="flex items-center px-4 py-3 text-sm font-medium rounded-lg bg-indigo-600 text-white cursor-default">
-                <i class="fas fa-user-md mr-3"></i> Doctor Management
+            
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Core Management</div>
+            <a onclick="window.location.href='/doctor-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl bg-blue-600 text-white cursor-pointer transition-all shadow-lg shadow-blue-900/20">
+                <i class="fas fa-user-md mr-3 group-hover:scale-110 transition-transform"></i> Doctors
+            </a>
+            <a onclick="window.location.href='/patient-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-hospital-user mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Patients
+            </a>
+            <a onclick="window.location.href='/availability-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-clock mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Availability
+            </a>
+            
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Operations</div>
+            <a onclick="window.location.href='/prescription-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-history mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Prescriptions
+            </a>
+            <a onclick="window.location.href='/medicine-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-pills mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Pharmacy
+            </a>
+            <a onclick="window.location.href='/medical-test-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-microscope mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Lab Reports
             </a>
         </nav>
     </aside>
 
-    <main class="ml-64 p-8 w-full flex justify-center items-center">
-        <div class="bg-white w-full max-w-2xl rounded-2xl border border-slate-200 shadow-xl p-8">
-            <div class="mb-8">
-                <h2 id="formTitle" class="text-2xl font-bold text-slate-800">Doctor Registration</h2>
-                <p class="text-slate-500 text-sm">Fill in the details below to manage medical staff.</p>
+    <main class="ml-64 p-8 w-full flex flex-col items-center">
+        <header class="w-full max-w-4xl flex justify-between items-center mb-10 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div>
+                <h1 id="formTitle" class="text-2xl font-bold text-slate-800 tracking-tight">Doctor Registration</h1>
+                <p class="text-slate-500 text-xs mt-1">Onboard staff members to the enterprise clinical system</p>
             </div>
-            
-            <form id="doctorForm" class="space-y-6">
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="col-span-2">
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Full Name</label>
-                        <input type="text" id="name" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="Dr. John Doe">
+        </header>
+
+        <div class="glass-card w-full max-w-4xl rounded-3xl shadow-xl p-10 mb-10">
+            <form id="doctorForm" class="space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="col-span-1 md:col-span-2">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Full Name</label>
+                        <input type="text" id="name" required class="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Dr. John Doe">
                     </div>
+
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Specialization</label>
-                        <input type="text" id="specialization" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Email Address</label>
+                        <input type="email" id="email" required class="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="doctor@hospital.com">
                     </div>
+
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Experience (Years)</label>
-                        <input type="number" id="experience" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Phone Number</label>
+                        <input type="text" id="phone" required class="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
                     </div>
-                    <div class="col-span-2">
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Qualifications</label>
-                        <input type="text" id="qualification" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="MBBS, MD (Comma separated)">
-                    </div>
+
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Gender</label>
-                        <select id="gender" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Specialization</label>
+                        <input type="text" id="specialization" required class="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Experience (Years)</label>
+                        <input type="number" id="experience" required class="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Primary Hospital</label>
+                        <input type="text" id="hospitalName" required class="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Consultation Fee (₹)</label>
+                        <input type="number" id="consultationFee" required class="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Gender</label>
+                        <select id="gender" class="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
                         </select>
                     </div>
+
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Phone</label>
-                        <input type="text" id="phone" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Availability Status</label>
+                        <select id="availability" class="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                            <option value="AVAILABLE">Online / Available</option>
+                            <option value="ON_LEAVE">On Leave</option>
+                            <option value="BUSY">In Consultation</option>
+                        </select>
+                    </div>
+
+                    <div class="col-span-1 md:col-span-2">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Qualifications</label>
+                        <input type="text" id="qualification" class="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="MBBS, MD (Comma separated)">
+                    </div>
+
+                    <div class="col-span-1 md:col-span-2">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Clinical Address</label>
+                        <textarea id="address" rows="3" class="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Enter the full clinic or hospital block address"></textarea>
                     </div>
                 </div>
-                <div class="flex gap-4 pt-4">
-                    <button type="submit" id="submitBtn" class="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all">Register Doctor</button>
-                    <button type="button" onclick="window.location.href='/dashboard'" class="px-8 py-3 rounded-xl border border-slate-200 font-bold text-slate-500 hover:bg-slate-50 transition-all">Cancel</button>
+
+                <div class="flex gap-4 pt-6">
+                    <button type="submit" id="submitBtn" class="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all">Register Doctor</button>
+                    <button type="button" onclick="window.location.href='/dashboard'" class="px-10 py-4 rounded-2xl border border-slate-200 font-bold text-slate-400 hover:bg-slate-50 transition-all">Cancel</button>
                 </div>
             </form>
         </div>
@@ -70,55 +140,56 @@
     <script>
         const API_BASE = "http://localhost:8080/api/doctors";
 
-        // --- 1. LOAD DATA IF IN EDIT MODE ---
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const doctorId = urlParams.get('id');
 
             if (doctorId) {
-                // Change UI to Update Mode
                 document.getElementById('formTitle').innerText = "Update Doctor Profile";
-                document.getElementById('submitBtn').innerText = "Update Information";
+                document.getElementById('submitBtn').innerText = "Update Enterprise Record";
 
                 try {
                     const res = await fetch(`${API_BASE}/${doctorId}`);
                     if (res.ok) {
                         const d = await res.json();
-                        // Fill Form
                         document.getElementById('name').value = d.name || '';
+                        document.getElementById('email').value = d.email || '';
                         document.getElementById('specialization').value = d.specialization || '';
                         document.getElementById('experience').value = d.experience || 0;
+                        document.getElementById('hospitalName').value = d.hospitalName || '';
+                        document.getElementById('consultationFee').value = d.consultationFee || 0;
                         document.getElementById('gender').value = d.gender || 'Male';
+                        document.getElementById('availability').value = d.availability || 'AVAILABLE';
                         document.getElementById('phone').value = d.phone || '';
+                        document.getElementById('address').value = d.address || '';
                         
-                        // Handle Qualifications Array to String
                         if (d.qualification && Array.isArray(d.qualification)) {
                             document.getElementById('qualification').value = d.qualification.join(', ');
                         }
                     }
-                } catch (err) {
-                    console.error("Failed to fetch doctor details:", err);
-                }
+                } catch (err) { console.error("Sync Error:", err); }
             }
         });
 
-        // --- 2. HANDLE FORM SUBMISSION (CREATE OR UPDATE) ---
         document.getElementById('doctorForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const urlParams = new URLSearchParams(window.location.search);
             const doctorId = urlParams.get('id');
 
             const doctorData = {
                 name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
                 specialization: document.getElementById('specialization').value,
                 experience: parseInt(document.getElementById('experience').value),
+                hospitalName: document.getElementById('hospitalName').value,
+                consultationFee: parseFloat(document.getElementById('consultationFee').value),
                 qualification: document.getElementById('qualification').value.split(',').map(s => s.trim()),
                 gender: document.getElementById('gender').value,
-                phone: document.getElementById('phone').value
+                availability: document.getElementById('availability').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value
             };
 
-            // Switch between POST (new) and PUT (update)
             const method = doctorId ? 'PUT' : 'POST';
             const url = doctorId ? `${API_BASE}/${doctorId}` : API_BASE;
 
@@ -130,15 +201,10 @@
                 });
 
                 if (res.ok) { 
-                    alert(doctorId ? "Doctor Updated Successfully!" : "Doctor Onboarded Successfully!"); 
+                    alert(doctorId ? "Enterprise Record Updated!" : "Doctor Onboarded Successfully!"); 
                     window.location.href = '/dashboard'; 
-                } else {
-                    alert("Error saving data. Please check your backend.");
                 }
-            } catch (err) {
-                console.error("Submission error:", err);
-                alert("Connection failed.");
-            }
+            } catch (err) { alert("System communication error."); }
         });
     </script>
 </body>

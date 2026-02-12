@@ -2,77 +2,114 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HealthFlow Pro | Doctor Directory</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>body { font-family: 'Inter', sans-serif; }</style>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-gradient { background: #0f172a; }
+        .app-bg {
+            background-color: #f1f5f9;
+            background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+        }
+        .glass-card { background: #ffffff; border: 1px solid #e2e8f0; }
+    </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-900 flex">
+<body class="app-bg text-slate-900 flex">
 
-    <aside class="fixed left-0 top-0 h-screen w-64 bg-slate-900 text-white shadow-2xl z-50">
-        <div class="p-6">
-            <h2 class="text-xl font-bold tracking-wider text-indigo-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+    <aside class="sidebar-gradient fixed left-0 top-0 h-screen w-64 text-white shadow-2xl z-50">
+        <div class="p-6 text-center border-b border-slate-700/50">
+            <h2 class="text-xl font-bold tracking-wider text-blue-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+            <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1 font-semibold">Enterprise Dashboard</p>
         </div>
-        <nav class="mt-6 px-4 space-y-2">
-            <a onclick="window.location.href='/dashboard'" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all">
-                <i class="fas fa-chart-pie mr-3"></i> Dashboard
+        
+        <nav class="mt-6 px-4 space-y-1">
+            <a onclick="window.location.href='/dashboard'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-chart-pie mr-3 text-blue-400"></i> Dashboard Overview
             </a>
-            <a class="flex items-center px-4 py-3 text-sm font-medium rounded-lg bg-indigo-600 text-white cursor-default">
-                <i class="fas fa-user-md mr-3"></i> Doctor Directory
+            
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Core Management</div>
+            <a onclick="window.location.href='/doctor-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl bg-blue-600 text-white cursor-pointer transition-all shadow-lg shadow-blue-900/20">
+                <i class="fas fa-user-md mr-3"></i> Doctors
+            </a>
+            <a onclick="window.location.href='/patient-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-hospital-user mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Patients
+            </a>
+            <a onclick="window.location.href='/availability-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-clock mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Availability
+            </a>
+            
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Operations</div>
+            <a onclick="window.location.href='/prescription-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-history mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Prescriptions
+            </a>
+            <a onclick="window.location.href='/medicine-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-pills mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Pharmacy
+            </a>
+            <a onclick="window.location.href='/medical-test-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-microscope mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Lab Reports
             </a>
         </nav>
     </aside>
 
     <main class="ml-64 p-8 w-full min-h-screen">
-        <header class="flex justify-between items-center mb-10">
+        <header class="flex justify-between items-center mb-10 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
             <div>
-                <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Doctor Directory</h1>
-                <p class="text-slate-500 text-sm mt-1">Manage and view all registered medical professionals.</p>
+                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Doctor Directory</h1>
+                <p class="text-slate-500 text-xs mt-1">Manage enterprise medical staff and clinical permissions</p>
             </div>
-            <button onclick="window.location.href='/doctor-register'" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-indigo-100 transition-all">
+            <button onclick="window.location.href='/doctor-register'" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-lg shadow-blue-100 transition-all flex items-center">
                 <i class="fas fa-plus mr-2"></i> ADD NEW DOCTOR
             </button>
         </header>
 
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                
+        <div class="glass-card p-6 rounded-2xl shadow-sm mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div class="relative">
-                    <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
                     <input type="text" id="searchName" placeholder="Search name..." 
-                        class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                        class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm">
                 </div>
                 
                 <div class="relative">
-                    <i class="fas fa-stethoscope absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" id="searchSpecialization" placeholder="Search specialty..." 
-                        class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                    <i class="fas fa-hospital absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="searchHospital" placeholder="Hospital..." 
+                        class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm">
                 </div>
 
-                <div class="flex gap-2">
-                    <input type="number" id="minExp" placeholder="Min Exp" class="w-1/2 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
-                    <input type="number" id="maxExp" placeholder="Max Exp" class="w-1/2 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                <div class="relative">
+                    <i class="fas fa-stethoscope absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="searchSpecialization" placeholder="Specialty..." 
+                        class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm">
                 </div>
 
-                <button onclick="performSearch()" class="bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-md">
-                    <i class="fas fa-filter mr-2 text-xs"></i> APPLY FILTERS
+                <div class="relative">
+                    <i class="fas fa-wallet absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="number" id="maxFee" placeholder="Max Fee (₹)" 
+                        class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm">
+                </div>
+
+                <button onclick="performSearch()" class="bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-700 transition-all shadow-md text-xs tracking-widest uppercase">
+                    <i class="fas fa-filter mr-2"></i> Filter
                 </button>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="glass-card rounded-2xl shadow-sm overflow-hidden">
             <table class="w-full text-left border-collapse">
                 <thead class="bg-slate-50 border-b border-slate-100">
                     <tr class="text-[10px] uppercase text-slate-400 font-bold tracking-widest">
-                        <th class="px-8 py-5">Full Name</th>
-                        <th class="px-8 py-5">Specialization</th>
-                        <th class="px-8 py-5 text-center">Experience</th>
-                        <th class="px-8 py-5">Contact</th>
-                        <th class="px-8 py-5 text-right">Actions</th>
+                        <th class="px-6 py-5">Doctor Info</th>
+                        <th class="px-6 py-5">Specialization</th>
+                        <th class="px-6 py-5">Hospital & Fee</th>
+                        <th class="px-6 py-5">Status</th>
+                        <th class="px-6 py-5 text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody id="doctorTableBody" class="divide-y divide-slate-100">
+                <tbody id="doctorTableBody" class="divide-y divide-slate-100 bg-white">
                     </tbody>
             </table>
         </div>
@@ -86,80 +123,82 @@
                 const res = await fetch(API_BASE);
                 const doctors = await res.json();
                 renderTable(doctors);
-            } catch (err) {
-                console.error("Failed to load doctors:", err);
-            }
+            } catch (err) { console.error("Load Error:", err); }
         }
 
         function renderTable(doctors) {
             const body = document.getElementById('doctorTableBody');
             if (doctors.length === 0) {
-                body.innerHTML = `<tr><td colspan="5" class="p-12 text-center text-slate-400 font-medium">No doctors found matching your criteria.</td></tr>`;
+                body.innerHTML = `<tr><td colspan="5" class="p-12 text-center text-slate-400 font-medium italic">No staff records found.</td></tr>`;
                 return;
             }
-            body.innerHTML = doctors.map(d => `
+            body.innerHTML = doctors.map(d => {
+                let statusColor = "bg-emerald-50 text-emerald-600";
+                if (d.availability === "ON_LEAVE") statusColor = "bg-rose-50 text-rose-600";
+                if (d.availability === "BUSY") statusColor = "bg-amber-50 text-amber-600";
+
+                return `
                 <tr class="hover:bg-slate-50/50 transition-colors">
-                    <td class="px-8 py-5">
-                        <div class="font-semibold text-slate-700">${d.name}</div>
-                        <div class="text-[10px] text-slate-400 uppercase font-bold tracking-tighter">${d.gender || 'N/A'}</div>
+                    <td class="px-6 py-5">
+                        <div class="font-bold text-slate-700 text-sm">${d.name}</div>
+                        <div class="text-[10px] text-slate-400 font-medium">${d.email || d.phone}</div>
                     </td>
-                    <td class="px-8 py-5">
-                        <span class="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase">
+                    <td class="px-6 py-5">
+                        <span class="bg-blue-50 text-blue-600 text-[10px] font-bold px-3 py-1 rounded-lg uppercase">
                             ${d.specialization}
                         </span>
+                        <div class="text-[9px] text-slate-400 mt-1 font-bold italic tracking-tighter">${d.experience} Yrs Experience</div>
                     </td>
-                    <td class="px-8 py-5 text-center text-slate-600 text-sm font-medium">${d.experience} Years</td>
-                    <td class="px-8 py-5 text-slate-500 text-sm font-mono tracking-tight">${d.phone}</td>
-                    <td class="px-8 py-5 text-right">
+                    <td class="px-6 py-5">
+                        <div class="text-xs font-semibold text-slate-600">${d.hospitalName || 'Clinical Facility'}</div>
+                        <div class="text-[11px] text-blue-500 font-bold">₹${d.consultationFee || 0}</div>
+                    </td>
+                    <td class="px-6 py-5">
+                        <span class="${statusColor} text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-tighter">
+                            ● ${d.availability || 'AVAILABLE'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-5 text-right">
                         <div class="flex justify-end gap-2">
-                            <button onclick="editDoctor('${d.id}')" class="text-indigo-600 hover:bg-indigo-50 w-9 h-9 flex items-center justify-center rounded-xl transition-all">
-                                <i class="fas fa-edit"></i>
+                            <button onclick="editDoctor('${d.id}')" class="text-blue-600 hover:bg-blue-50 w-8 h-8 flex items-center justify-center rounded-lg transition-all">
+                                <i class="fas fa-edit text-xs"></i>
                             </button>
-                            <button onclick="deleteDoctor('${d.id}', '${d.name}')" class="text-rose-600 hover:bg-rose-50 w-9 h-9 flex items-center justify-center rounded-xl transition-all">
-                                <i class="fas fa-trash"></i>
+                            <button onclick="deleteDoctor('${d.id}', '${d.name}')" class="text-rose-500 hover:bg-rose-50 w-8 h-8 flex items-center justify-center rounded-lg transition-all">
+                                <i class="fas fa-trash text-xs"></i>
                             </button>
                         </div>
                     </td>
                 </tr>
-            `).join('');
+            `}).join('');
         }
 
         async function performSearch() {
             const name = document.getElementById('searchName').value;
+            const hospital = document.getElementById('searchHospital').value;
             const spec = document.getElementById('searchSpecialization').value;
-            const minExp = document.getElementById('minExp').value;
-            const maxExp = document.getElementById('maxExp').value;
+            const maxFee = document.getElementById('maxFee').value;
 
-            // Search endpoint you defined in DoctorController
             let url = new URL(`${API_BASE}/search`);
             if (name) url.searchParams.append("name", name);
+            if (hospital) url.searchParams.append("hospitalName", hospital);
             if (spec) url.searchParams.append("specialization", spec);
-            if (minExp) url.searchParams.append("minExp", minExp);
-            if (maxExp) url.searchParams.append("maxExp", maxExp);
+            if (maxFee) url.searchParams.append("maxFee", maxFee);
 
             try {
                 const res = await fetch(url);
                 const filteredDoctors = await res.json();
                 renderTable(filteredDoctors);
-            } catch (err) {
-                console.error("Search failed:", err);
-            }
+            } catch (err) { console.error("Search Failed:", err); }
         }
 
-        function editDoctor(id) {
-            window.location.href = `/doctor-register?id=${id}`;
-        }
+        function editDoctor(id) { window.location.href = `/doctor-register?id=${id}`; }
 
         async function deleteDoctor(id, name) {
-            if (confirm(`Are you sure you want to delete Dr. ${name}?`)) {
+            if (confirm(`Confirm permanent removal of Dr. ${name}?`)) {
                 try {
                     const response = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
-                    if (response.ok || response.status === 204) {
-                        performSearch(); 
-                    }
-                } catch (err) {
-                    console.error("Error deleting doctor:", err);
-                }
+                    if (response.ok || response.status === 204) loadDoctors();
+                } catch (err) { alert("System Error."); }
             }
         }
 

@@ -2,83 +2,124 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HealthFlow Pro | Set Availability</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-gradient { background: #0f172a; }
+        .app-bg {
+            background-color: #f1f5f9;
+            background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+        }
+        .glass-card { background: #ffffff; border: 1px solid #e2e8f0; }
+        .section-tag { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #3b82f6; }
+    </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-900 font-['Inter'] flex">
+<body class="app-bg text-slate-900 flex">
 
-    <aside class="fixed left-0 top-0 h-screen w-64 bg-slate-900 text-white shadow-2xl z-50">
-        <div class="p-6 border-b border-slate-800">
-            <h2 class="text-xl font-bold tracking-wider text-indigo-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+    <aside class="sidebar-gradient fixed left-0 top-0 h-screen w-64 text-white shadow-2xl z-50">
+        <div class="p-6 text-center border-b border-slate-700/50">
+            <h2 class="text-xl font-bold tracking-wider text-blue-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+            <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1 font-semibold">Enterprise Dashboard</p>
         </div>
-        <nav class="mt-6 px-4 space-y-2">
-            <a onclick="window.location.href='/dashboard'" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all">
-                <i class="fas fa-chart-pie mr-3"></i> Dashboard
+        
+        <nav class="mt-6 px-4 space-y-1">
+            <a onclick="window.location.href='/dashboard'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-chart-pie mr-3 text-blue-400"></i> Dashboard Overview
             </a>
-            <a class="flex items-center px-4 py-3 text-sm font-medium rounded-lg bg-indigo-600 text-white cursor-default">
-                <i class="fas fa-clock mr-3"></i> Set Availability
+            
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Core Management</div>
+            <a onclick="window.location.href='/doctor-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-user-md mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Doctors
+            </a>
+            <a onclick="window.location.href='/patient-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-hospital-user mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Patients
+            </a>
+            <a onclick="window.location.href='/availability-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl bg-blue-600 text-white cursor-pointer transition-all shadow-lg shadow-blue-900/20">
+                <i class="fas fa-clock mr-3"></i> Availability
+            </a>
+            
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Operations</div>
+            <a onclick="window.location.href='/prescription-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-history mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Prescriptions
+            </a>
+            <a onclick="window.location.href='/medicine-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-pills mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Pharmacy
+            </a>
+            <a onclick="window.location.href='/medical-test-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-microscope mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Lab Reports
             </a>
         </nav>
     </aside>
 
-    <main class="ml-64 p-8 w-full flex justify-center items-center">
-        <div class="bg-white w-full max-w-2xl rounded-2xl border border-slate-200 shadow-xl p-8 my-10">
-            <div class="mb-8">
-                <h2 id="pageTitle" class="text-2xl font-bold text-slate-800">Doctor Availability</h2>
-                <p class="text-slate-500 text-sm">Schedule active shifts and consultation hours for medical staff.</p>
+    <main class="ml-64 p-8 w-full flex flex-col items-center">
+        <header class="w-full max-w-4xl flex justify-between items-center mb-10 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div>
+                <h1 id="pageTitle" class="text-2xl font-bold text-slate-800 tracking-tight">Shift Allocation</h1>
+                <p class="text-slate-500 text-xs mt-1">Configure clinical duty hours and consultation windows for medical staff</p>
             </div>
-            
-            <form id="availabilityForm" class="space-y-6">
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="col-span-2">
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Doctor Identifier (Business ID)</label>
-                        <input type="text" id="doctorId" required 
-                               class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" 
-                               placeholder="e.g., DOC102">
-                    </div>
+        </header>
 
-                    <div class="col-span-2">
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Shift Day</label>
-                        <select id="day" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
-                            <option value="Monday">Monday</option>
-                            <option value="Tuesday">Tuesday</option>
-                            <option value="Wednesday">Wednesday</option>
-                            <option value="Thursday">Thursday</option>
-                            <option value="Friday">Friday</option>
-                            <option value="Saturday">Saturday</option>
-                            <option value="Sunday">Sunday</option>
-                        </select>
+        <div class="glass-card w-full max-w-4xl rounded-3xl shadow-xl p-10 mb-10">
+            <form id="availabilityForm" class="space-y-10">
+                
+                <div>
+                    <h3 class="section-tag mb-6 border-l-4 border-blue-500 pl-3">Staff & Schedule Info</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Doctor ID (Internal)</label>
+                            <input type="text" id="doctorId" required 
+                                   class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all font-mono text-sm" 
+                                   placeholder="e.g., DOC102">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Assigned Shift Day</label>
+                            <select id="day" class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                                <option value="Monday">Monday</option>
+                                <option value="Tuesday">Tuesday</option>
+                                <option value="Wednesday">Wednesday</option>
+                                <option value="Thursday">Thursday</option>
+                                <option value="Friday">Friday</option>
+                                <option value="Saturday">Saturday</option>
+                                <option value="Sunday">Sunday</option>
+                            </select>
+                        </div>
                     </div>
+                </div>
 
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Start Time</label>
-                        <input type="time" id="startTime" required 
-                               class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">End Time</label>
-                        <input type="time" id="endTime" required 
-                               class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
-                    </div>
-
-                    <div class="col-span-2">
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Status</label>
-                        <select id="available" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
-                            <option value="true">Available </option>
-                            <option value="false">Unavailable </option>
-                        </select>
+                <div>
+                    <h3 class="section-tag mb-6 border-l-4 border-blue-500 pl-3">Clinical Duty Window</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Start Time</label>
+                            <input type="time" id="startTime" required 
+                                   class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">End Time</label>
+                            <input type="time" id="endTime" required 
+                                   class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Initial Duty Status</label>
+                            <select id="available" class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                                <option value="true">ONLINE / AVAILABLE</option>
+                                <option value="false">OFFLINE / UNAVAILABLE</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
                 <div class="flex gap-4 pt-6">
-                    <button type="submit" id="submitBtn" class="flex-1 bg-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all">
-                        Save Schedule
+                    <button type="submit" id="submitBtn" class="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all">
+                        Commit Shift Schedule
                     </button>
                     <button type="button" onclick="window.location.href='/availability-list'" 
-                            class="px-10 py-4 rounded-xl border border-slate-200 font-bold text-slate-500 hover:bg-slate-50 transition-all">
+                            class="px-12 py-4 rounded-2xl border border-slate-200 font-bold text-slate-400 hover:bg-slate-50 transition-all">
                         Cancel
                     </button>
                 </div>
@@ -89,36 +130,30 @@
     <script>
         const API_BASE = 'http://localhost:8080/api/doctor-availability';
         
-        // 1. Check for Edit Mode on Load
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const scheduleId = urlParams.get('id');
 
             if (scheduleId) {
-                document.getElementById('pageTitle').innerText = "Update Availability";
-                document.getElementById('submitBtn').innerText = "Update Schedule";
+                document.getElementById('pageTitle').innerText = "Update Shift Allocation";
+                document.getElementById('submitBtn').innerText = "Update Enterprise Record";
 
                 try {
                     const res = await fetch(`${API_BASE}/${scheduleId}`);
                     if (res.ok) {
                         const data = await res.json();
-                        // Fill form fields
                         document.getElementById('doctorId').value = data.doctorId;
                         document.getElementById('day').value = data.day;
                         document.getElementById('startTime').value = data.startTime;
                         document.getElementById('endTime').value = data.endTime;
                         document.getElementById('available').value = data.available.toString();
                     }
-                } catch (err) {
-                    console.error("Error fetching schedule:", err);
-                }
+                } catch (err) { console.error("Sync error:", err); }
             }
         });
 
-        // 2. Handle Form Submission (POST or PUT)
         document.getElementById('availabilityForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const urlParams = new URLSearchParams(window.location.search);
             const scheduleId = urlParams.get('id');
 
@@ -141,16 +176,10 @@
                 });
                 
                 if (res.ok) { 
-                    alert(scheduleId ? "Schedule updated successfully!" : "Availability set successfully!"); 
+                    alert(scheduleId ? "Enterprise record updated!" : "Shift successfully allocated!"); 
                     window.location.href = '/availability-list'; 
-                } else {
-                    const errorMsg = await res.text();
-                    alert("Operation failed: " + errorMsg);
                 }
-            } catch (err) {
-                console.error("Submission error:", err);
-                alert("Connection failed. Check backend.");
-            }
+            } catch (err) { alert("System communication error."); }
         });
     </script>
 </body>

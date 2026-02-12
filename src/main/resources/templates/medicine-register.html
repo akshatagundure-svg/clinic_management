@@ -2,107 +2,148 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HealthFlow Pro | Medicine Registry</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>body { font-family: 'Inter', sans-serif; }</style>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-gradient { background: #0f172a; }
+        .app-bg {
+            background-color: #f1f5f9;
+            background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+        }
+        .glass-card { background: #ffffff; border: 1px solid #e2e8f0; }
+        .section-tag { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #3b82f6; }
+    </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-900 flex">
+<body class="app-bg text-slate-900 flex">
 
-    <aside class="fixed left-0 top-0 h-screen w-64 bg-slate-900 text-white shadow-2xl z-50">
-        <div class="p-6 border-b border-slate-800">
-            <h2 class="text-xl font-bold tracking-wider text-indigo-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+    <aside class="sidebar-gradient fixed left-0 top-0 h-screen w-64 text-white shadow-2xl z-50">
+        <div class="p-6 text-center border-b border-slate-700/50">
+            <h2 class="text-xl font-bold tracking-wider text-blue-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+            <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1 font-semibold">Enterprise Dashboard</p>
         </div>
-        <nav class="mt-6 px-4 space-y-2">
-            <a onclick="window.location.href='/dashboard'" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-slate-300 hover:bg-slate-800 transition-all cursor-pointer">
-                <i class="fas fa-chart-pie mr-3"></i> Dashboard
+        
+        <nav class="mt-6 px-4 space-y-1">
+            <a onclick="window.location.href='/dashboard'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl bg-blue-600 text-white cursor-pointer transition-all hover:bg-blue-500 shadow-lg shadow-blue-900/20">
+                <i class="fas fa-chart-pie mr-3"></i> Dashboard Overview
             </a>
-            <a onclick="window.location.href='/medicine-inventory'" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-slate-300 hover:bg-slate-800 transition-all cursor-pointer">
-                <i class="fas fa-pills mr-3"></i> Medicine Inventory
+            
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Core Management</div>
+            <a onclick="window.location.href='/doctor-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-user-md mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Doctors
+            </a>
+            <a onclick="window.location.href='/patient-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-hospital-user mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Patients
+            </a>
+            <a onclick="window.location.href='/availability-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-clock mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Availability
+            </a>
+            
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Operations</div>
+            <a onclick="window.location.href='/prescription-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-history mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Prescriptions
+            </a>
+            <a onclick="window.location.href='/medicine-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-pills mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Pharmacy
+            </a>
+            <a onclick="window.location.href='/medical-test-list'" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-microscope mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Lab Reports
             </a>
         </nav>
     </aside>
-
-    <main class="ml-64 p-8 w-full flex justify-center items-center overflow-y-auto">
-        <div class="bg-white w-full max-w-4xl rounded-2xl border border-slate-200 shadow-xl p-8 my-10">
-            <div class="mb-8">
-                <h2 id="formTitle" class="text-2xl font-bold text-slate-800">Pharmacy Intake Form</h2>
-                <p id="formSubtitle" class="text-slate-500 text-sm">Register new medicine stock with precise clinical and pricing details.</p>
+    <main class="ml-64 p-8 w-full flex flex-col items-center">
+        <header class="w-full max-w-4xl flex justify-between items-center mb-10 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div>
+                <h1 id="formTitle" class="text-2xl font-bold text-slate-800 tracking-tight">Pharmacy Intake Form</h1>
+                <p id="formSubtitle" class="text-slate-500 text-xs mt-1">Register medicine stock with precise clinical and pricing details</p>
             </div>
-            
-            <form id="medicineForm" class="grid grid-cols-2 gap-6">
-                <div class="col-span-2"><h3 class="text-indigo-600 text-xs font-bold uppercase tracking-widest border-b border-slate-100 pb-2">Basic Information</h3></div>
+        </header>
+
+        <div class="glass-card w-full max-w-4xl rounded-3xl shadow-xl p-10 mb-10">
+            <form id="medicineForm" class="space-y-10">
                 
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Medicine ID (Business ID)</label>
-                    <input type="text" id="medId" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="MED-101">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Medicine Name</label>
-                    <input type="text" id="name" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="Paracetamol">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Manufacturer Company</label>
-                    <input type="text" id="companyName" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="Pfizer">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Record Status</label>
-                    <select id="recordStatus" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
-                        <option value="ACTIVE">ACTIVE</option>
-                        <option value="INACTIVE">INACTIVE</option>
-                        <option value="OUT_OF_STOCK">OUT OF STOCK</option>
-                    </select>
-                </div>
-
-                <div class="col-span-2 mt-4"><h3 class="text-indigo-600 text-xs font-bold uppercase tracking-widest border-b border-slate-100 pb-2">Clinical Details</h3></div>
-                
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Dosage</label>
-                    <input type="text" id="dosage" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="500mg">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Route of Admin</label>
-                    <select id="route" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
-                        <option value="Oral">Oral</option>
-                        <option value="Intravenous">Intravenous</option>
-                        <option value="Topical">Topical</option>
-                        <option value="Inhalation">Inhalation</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Frequency</label>
-                    <input type="text" id="frequency" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="Once daily">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Unit Price ($)</label>
-                    <input type="number" step="0.01" id="price" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="0.00">
+                    <h3 class="section-tag mb-6 border-l-4 border-blue-500 pl-3">Basic Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Medicine ID (Business ID)</label>
+                            <input type="text" id="medId" required class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all font-mono text-sm" placeholder="MED-101">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Medicine Name</label>
+                            <input type="text" id="name" required class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Paracetamol">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Manufacturer</label>
+                            <input type="text" id="companyName" required class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Pfizer">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Inventory Status</label>
+                            <select id="recordStatus" class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                                <option value="ACTIVE">ACTIVE</option>
+                                <option value="INACTIVE">INACTIVE</option>
+                                <option value="OUT_OF_STOCK">OUT OF STOCK</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="col-span-2 mt-4"><h3 class="text-indigo-600 text-xs font-bold uppercase tracking-widest border-b border-slate-100 pb-2">Timeline & Expiry</h3></div>
-                
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Stock Entry (Start Date)</label>
-                    <input type="datetime-local" id="startDate" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                    <h3 class="section-tag mb-6 border-l-4 border-blue-500 pl-3">Clinical Specification</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Dosage</label>
+                            <input type="text" id="dosage" required class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="500mg">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Route of Admin</label>
+                            <select id="route" class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                                <option value="Oral">Oral</option>
+                                <option value="Intravenous">Intravenous</option>
+                                <option value="Topical">Topical</option>
+                                <option value="Inhalation">Inhalation</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Standard Frequency</label>
+                            <input type="text" id="frequency" required class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Once daily">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Unit Price ($)</label>
+                            <input type="number" step="0.01" id="price" required class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="0.00">
+                        </div>
+                    </div>
                 </div>
+
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Expiry Date</label>
-                    <input type="datetime-local" id="expiryDate" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                    <h3 class="section-tag mb-6 border-l-4 border-blue-500 pl-3">Timeline & Storage</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Stock Entry Date</label>
+                            <input type="datetime-local" id="startDate" required class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Expiry Date</label>
+                            <input type="datetime-local" id="expiryDate" required class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                        </div>
+                        <div class="col-span-1 md:col-span-2">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Special Instructions</label>
+                            <textarea id="specialInstructions" rows="2" class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Storage requirements or warnings..."></textarea>
+                        </div>
+                        <div class="col-span-1 md:col-span-2 flex items-center space-x-3 bg-blue-50/50 p-5 rounded-2xl border border-blue-100">
+                            <input type="checkbox" id="doctorChangeAllowed" class="w-5 h-5 text-blue-600 rounded-lg focus:ring-blue-500 border-slate-300">
+                            <label class="text-sm font-semibold text-slate-700">Allow Physician to substitute brand?</label>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="col-span-2">
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Special Instructions</label>
-                    <textarea id="specialInstructions" rows="2" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="Keep refrigerated..."></textarea>
-                </div>
-
-                <div class="col-span-2 flex items-center space-x-3 bg-slate-50 p-4 rounded-xl">
-                    <input type="checkbox" id="doctorChangeAllowed" class="w-5 h-5 text-indigo-600 rounded">
-                    <label class="text-sm font-semibold text-slate-700">Allow Doctor to Change Brand?</label>
-                </div>
-
-                <div class="col-span-2 flex gap-4 pt-6">
-                    <button type="submit" id="submitBtn" class="flex-1 bg-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all">Register Medicine</button>
-                    <button type="button" onclick="window.history.back()" class="px-10 py-4 rounded-xl border border-slate-200 font-bold text-slate-500 hover:bg-slate-50 transition-all">Cancel</button>
+                <div class="flex gap-4 pt-6">
+                    <button type="submit" id="submitBtn" class="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all">Register Stock</button>
+                    <button type="button" onclick="window.history.back()" class="px-12 py-4 rounded-2xl border border-slate-200 font-bold text-slate-400 hover:bg-slate-50 transition-all">Cancel</button>
                 </div>
             </form>
         </div>
@@ -110,18 +151,14 @@
 
     <script>
         const API_BASE = 'http://localhost:8080/api/medicines';
-        
-        // --- 1. DETECT EDIT MODE ---
         const urlParams = new URLSearchParams(window.location.search);
         const editId = urlParams.get('id');
 
-        // If an ID exists, we are in EDIT mode
         if (editId) {
             document.getElementById('formTitle').innerText = "Update Medicine Record";
-            document.getElementById('formSubtitle').innerText = "Modify clinical and pricing details for existing stock.";
-            document.getElementById('submitBtn').innerText = "Update Details";
+            document.getElementById('formSubtitle').innerText = "Modify clinical and pricing details for existing enterprise stock";
+            document.getElementById('submitBtn').innerText = "Update Registry";
             
-            // Fetch existing data and pre-fill
             fetch(`${API_BASE}/${editId}`)
                 .then(res => res.json())
                 .then(data => {
@@ -135,22 +172,14 @@
                     document.getElementById('price').value = data.price || 0;
                     document.getElementById('specialInstructions').value = data.specialInstructions || '';
                     document.getElementById('doctorChangeAllowed').checked = data.doctorChangeAllowed || false;
-
-                    // Formatting dates for the datetime-local input (yyyy-MM-ddThh:mm)
                     if (data.startDate) document.getElementById('startDate').value = data.startDate.substring(0, 16);
                     if (data.expiryDate) document.getElementById('expiryDate').value = data.expiryDate.substring(0, 16);
-                })
-                .catch(err => console.error("Error fetching medicine:", err));
+                });
         }
 
-        // --- 2. HANDLE FORM SUBMISSION (POST vs PUT) ---
         document.getElementById('medicineForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            const formatToISO = (dateVal) => {
-                if (!dateVal) return null;
-                return new Date(dateVal).toISOString();
-            };
+            const formatToISO = (dateVal) => dateVal ? new Date(dateVal).toISOString() : null;
 
             const medicineData = {
                 medId: document.getElementById('medId').value,
@@ -168,28 +197,20 @@
                 endDate: formatToISO(document.getElementById('expiryDate').value)
             };
 
-            try {
-                // Use PUT if we have an editId, otherwise POST
-                const url = editId ? `${API_BASE}/${editId}` : API_BASE;
-                const method = editId ? 'PUT' : 'POST';
+            const url = editId ? `${API_BASE}/${editId}` : API_BASE;
+            const method = editId ? 'PUT' : 'POST';
 
+            try {
                 const res = await fetch(url, {
                     method: method,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(medicineData)
                 });
-                
                 if (res.ok) {
-                    alert(editId ? "Medicine updated successfully!" : "Medicine registered successfully!");
+                    alert(editId ? "Enterprise Record Updated!" : "Medicine Stock Registered!");
                     window.location.href = '/dashboard';
-                } else {
-                    const errorMsg = await res.text();
-                    alert("Error: " + errorMsg);
                 }
-            } catch (err) {
-                console.error(err);
-                alert("Server connection failed.");
-            }
+            } catch (err) { alert("Server connection failed."); }
         });
     </script>
 </body>
