@@ -29,14 +29,22 @@ public class PatientController {
     @Autowired
     private PatientRepository patientRepository;
 
-    // ✅ 1. COUNT (Specific path first)
+    // =====================================================
+    // 📊 METRICS & SEARCH (Specific paths first)
+    // =====================================================
+
+    /**
+     * Get total count of patients for dashboard stats
+     */
     @GetMapping("/count")
     public long getCount() {
         return patientRepository.count();
     }
 
-    // ✅ 2. ADVANCED FILTER/SEARCH (Specific path second)
-    // Access this via /api/patients/search or /api/patients/filter
+    /**
+     * Advanced Search/Filtering
+     * Usage: /api/patients/search?name=John&bloodGroup=O+
+     */
     @GetMapping("/search")
     public ResponseEntity<List<Patient>> filterPatients(
             @RequestParam(required = false) String patientId,
@@ -52,11 +60,11 @@ public class PatientController {
         }
         if (name != null && !name.isEmpty()) {
             String n = name.toLowerCase();
-            patients = patients.stream().filter(p -> p.getFullName() != null && p.getFullName().toLowerCase().contains(n)).collect(Collectors.toList());
+            patients = patients.stream().filter(p -> p.getFullName().toLowerCase().contains(n)).collect(Collectors.toList());
         }
         if (allergy != null && !allergy.isEmpty()) {
             String a = allergy.toLowerCase();
-            patients = patients.stream().filter(p -> p.getAllergies() != null && p.getAllergies().stream().anyMatch(x -> x.toLowerCase().contains(a))).collect(Collectors.toList());
+            patients = patients.stream().filter(p -> p.getAllergies().stream().anyMatch(x -> x.toLowerCase().contains(a))).collect(Collectors.toList());
         }
         if (bloodGroup != null && !bloodGroup.isEmpty()) {
             patients = patients.stream().filter(p -> p.getBloodGroup() != null && p.getBloodGroup().equalsIgnoreCase(bloodGroup)).collect(Collectors.toList());
@@ -67,20 +75,27 @@ public class PatientController {
         return ResponseEntity.ok(patients);
     }
 
-    // ✅ 3. READ ALL
+    // =====================================================
+    // 📂 CRUD OPERATIONS
+    // =====================================================
+
+    /**
+     * Fetch all patients
+     */
     @GetMapping
     public ResponseEntity<?> getAllPatients() {
         try {
-            List<Patient> patients = patientRepository.findAll();
-            return ResponseEntity.ok(patients);
+            return ResponseEntity.ok(patientRepository.findAll());
         } catch (Exception e) {
-            System.err.println("MAPPING ERROR: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Database record error: " + e.getMessage());
         }
     }
 
-    // ✅ 4. READ BY ID (Dynamic path MUST come after specific paths like /search and /count)
+    /**
+     * Fetch single patient by MongoDB ID
+     * (Placed after /count and /search to avoid path conflict)
+     */
     @GetMapping("/{id}")
     public ResponseEntity<Patient> getPatientById(@PathVariable String id) {
         return patientRepository.findById(id)
@@ -88,25 +103,38 @@ public class PatientController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ 5. CREATE ACCOUNT (Self Register)
-    @PostMapping("/register")
-    public ResponseEntity<Patient> registerPatient(@RequestBody Patient patient) {
-        if (patient.getFullName() == null || patient.getPhoneNumber() == null || patient.getEmailAddress() == null) {
-            return ResponseEntity.badRequest().build();
-        }
-        if (patient.getPatientId() == null || patient.getPatientId().isEmpty()) {
-            patient.setPatientId("PAT-" + UUID.randomUUID().toString().substring(0, 6));
-        }
-        return new ResponseEntity<>(patientRepository.save(patient), HttpStatus.CREATED);
-    }
-
-    // ✅ 6. CREATE (Full Form)
+    /**
+     * CREATE: Full Form Submission
+     * Handles ID generation to prevent Duplicate Key errors
+     */
     @PostMapping
     public ResponseEntity<Patient> createPatient(@RequestBody Patient patient) {
+        try {
+            ensureUniquePatientId(patient);
+            Patient saved = patientRepository.save(patient);
+            return new ResponseEntity<>(saved, HttpStatus.CREATED);
+        } catch (org.springframework.dao.DuplicateKeyException e) {
+            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * CREATE: Self Registration
+     */
+    @PostMapping("/register")
+    public ResponseEntity<Patient> registerPatient(@RequestBody Patient patient) {
+        if (patient.getFullName() == null || patient.getPhoneNumber() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        ensureUniquePatientId(patient);
         return new ResponseEntity<>(patientRepository.save(patient), HttpStatus.CREATED);
     }
 
-    // ✅ 7. UPDATE
+    /**
+     * UPDATE: Modify existing patient
+     */
     @PutMapping("/{id}")
     public ResponseEntity<Patient> updatePatient(@PathVariable String id, @RequestBody Patient d) {
         return patientRepository.findById(id)
@@ -129,11 +157,27 @@ public class PatientController {
             }).orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ 8. DELETE
+    /**
+     * DELETE: Remove patient
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletePatient(@PathVariable String id) {
         if (!patientRepository.existsById(id)) return ResponseEntity.notFound().build();
         patientRepository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // =====================================================
+    // 🛠 PRIVATE HELPERS
+    // =====================================================
+
+    /**
+     * Helper to ensure every saved patient has a generated Patient ID
+     */
+    private void ensureUniquePatientId(Patient patient) {
+        if (patient.getPatientId() == null || patient.getPatientId().trim().isEmpty()) {
+            String uniqueId = "PAT-" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+            patient.setPatientId(uniqueId);
+        }
     }
 }

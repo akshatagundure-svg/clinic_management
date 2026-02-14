@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Doctor | DocControl</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+
+    <div class="flex h-screen">
+        <aside class="w-64 bg-indigo-900 text-white flex-shrink-0 hidden md:block">
+            <div class="p-6 text-2xl font-bold border-b border-indigo-800">
+                <i class="fas fa-user-md mr-2"></i>DocControl
+            </div>
+            <nav class="mt-6">
+                <a href="/doctordb" class="block py-3 px-6 bg-indigo-800 border-l-4 border-white">
+                    <i class="fas fa-home mr-3"></i>Dashboard
+                </a>
+                <a href="/add-doctor" class="block py-3 px-6 hover:bg-indigo-800 transition">
+                    <i class="fas fa-user-md mr-3"></i>Add Doctor
+                </a>
+                <a href="/add-patient" class="block py-3 px-6 hover:bg-indigo-800 transition">
+                    <i class="fas fa-user-plus mr-3"></i>Add Patient
+                </a>
+                <a href="/patientinfo" class="block py-3 px-6 hover:bg-indigo-800 transition">
+                    <i class="fas fa-users mr-3"></i>Patient List
+                </a>
+                <a href="/clinic-register" class="block py-3 px-6 hover:bg-indigo-800 transition">
+                    <i class="fas fa-clinic-medical mr-3"></i>Register Clinic
+                </a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto">
+            <header class="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-10">
+                <h1 class="text-xl font-semibold text-gray-700">Register Doctor Profile</h1>
+                <button onclick="location.href='/doctordb'" class="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+                </button>
+            </header>
+
+            <div class="p-8 max-w-4xl mx-auto">
+                <form id="doctorForm" class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h2 class="text-lg font-semibold text-indigo-700 mb-4 border-b pb-2">Professional Credentials</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Full Name</label>
+                                <input type="text" id="name" required class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Specialization</label>
+                                <input type="text" id="specialization" required placeholder="e.g. Cardiology" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Experience (Years)</label>
+                                <input type="number" id="experience" required class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Qualifications (Comma separated)</label>
+                                <input type="text" id="qualification" required placeholder="MBBS, MD" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Gender</label>
+                                <select id="gender" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Consultation Fee ($)</label>
+                                <input type="number" id="consultationFee" required class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h2 class="text-lg font-semibold text-indigo-700 mb-4 border-b pb-2">Contact & Location</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Phone Number</label>
+                                <input type="tel" id="phone" required class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Email Address</label>
+                                <input type="email" id="email" required class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Hospital/Clinic Name</label>
+                                <input type="text" id="hospitalName" required class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Availability</label>
+                                <select id="availability" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                                    <option value="Full-Time">Full-Time</option>
+                                    <option value="Part-Time">Part-Time</option>
+                                    <option value="On-Call">On-Call</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700">Clinic Address</label>
+                                <textarea id="address" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md p-2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-4 pb-10">
+                        <button type="reset" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">Clear Form</button>
+                        <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shadow-md transition">
+                            <i class="fas fa-save mr-2"></i> Save Doctor Profile
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.getElementById('doctorForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Match exact names from Doctor.java model
+            const doctorData = {
+                name: document.getElementById('name').value,
+                specialization: document.getElementById('specialization').value,
+                experience: parseInt(document.getElementById('experience').value),
+                qualification: document.getElementById('qualification').value.split(',').map(s => s.trim()),
+                gender: document.getElementById('gender').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                consultationFee: parseFloat(document.getElementById('consultationFee').value),
+                availability: document.getElementById('availability').value,
+                hospitalName: document.getElementById('hospitalName').value,
+                address: document.getElementById('address').value
+            };
+
+            try {
+                const response = await fetch('/api/doctors', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(doctorData)
+                });
+                
+                if (response.ok) {
+                    alert('Doctor profile created successfully!');
+                    location.href = '/doctordb';
+                } else {
+                    const error = await response.text();
+                    alert('Error: ' + error);
+                }
+            } catch (err) {
+                console.error('Network Error:', err);
+                alert('Could not connect to server.');
+            }
+        });
+    </script>
+</body>
+</html>
