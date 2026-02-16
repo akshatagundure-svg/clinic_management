@@ -5,10 +5,8 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Dashboard Initialization (index.html)
-    // Only runs if the specific dashboard stat elements exist
-    if (document.getElementById('patientCount')) {
+    if (document.getElementById('patientCount') || document.getElementById('doctorCount')) {
         fetchStats();
-        // loadRecentPatients(); // Optional: Keep disabled if the table is removed from HTML
     }
 
     // 2. Full Patient List Initialization (patientinfo.html)
@@ -27,7 +25,13 @@ document.addEventListener('DOMContentLoaded', () => {
         patientForm.addEventListener('submit', handlePatientSubmit);
     }
 
-    // 5. Add Doctor Form Listener (add-doctor.html)
+    // 5. Profile Update Listener (my-profile.html)
+    const profileForm = document.getElementById('profileUpdateForm');
+    if (profileForm) {
+        profileForm.addEventListener('submit', handleProfileUpdate);
+    }
+
+    // 6. Add Doctor Form Listener
     const doctorForm = document.getElementById('doctorForm');
     if (doctorForm) {
         doctorForm.addEventListener('submit', handleDoctorSubmit);
@@ -38,28 +42,26 @@ document.addEventListener('DOMContentLoaded', () => {
 // 📊 API FETCHERS & DASHBOARD FUNCTIONS
 // =====================================================
 
-/**
- * Fetch counts for the dashboard cards
- */
 async function fetchStats() {
     try {
-        const patientRes = await fetch('/api/patients/count');
-        const patientCount = await patientRes.json();
-        const pElem = document.getElementById('patientCount');
-        if (pElem) pElem.innerText = patientCount;
+        const patientRes = await fetch('/api/patients');
+        if (patientRes.ok) {
+            const patients = await patientRes.json();
+            const pElem = document.getElementById('patientCount');
+            if (pElem) pElem.innerText = patients.length;
+        }
 
-        const doctorRes = await fetch('/api/doctors/count');
-        const doctorCount = await doctorRes.json();
-        const dElem = document.getElementById('doctorCount');
-        if (dElem) dElem.innerText = doctorCount;
+        const doctorRes = await fetch('/api/doctors');
+        if (doctorRes.ok) {
+            const doctors = await doctorRes.json();
+            const dElem = document.getElementById('doctorCount');
+            if (dElem) dElem.innerText = doctors.length;
+        }
     } catch (error) {
         console.error('Error fetching stats:', error);
     }
 }
 
-/**
- * Load the comprehensive patient list for patientinfo.html
- */
 async function loadFullPatientList() {
     const tableBody = document.getElementById('fullPatientTable');
     if (!tableBody) return;
@@ -73,7 +75,6 @@ async function loadFullPatientList() {
             return;
         }
 
-        // Display all patients, newest at the top
         tableBody.innerHTML = patients.reverse().map(p => `
             <tr class="hover:bg-gray-50 transition border-b border-gray-100">
                 <td class="px-6 py-4 text-xs font-mono text-indigo-600 font-bold">${p.patientId || 'N/A'}</td>
@@ -90,13 +91,9 @@ async function loadFullPatientList() {
         `).join('');
     } catch (e) {
         console.error("Error loading full patient database:", e);
-        tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-red-500 text-center">Error loading database.</td></tr>`;
     }
 }
 
-/**
- * Load the comprehensive doctor list for doctorinfo.html
- */
 async function loadFullDoctorList() {
     const tableBody = document.getElementById('fullDoctorTable');
     if (!tableBody) return;
@@ -104,11 +101,6 @@ async function loadFullDoctorList() {
     try {
         const response = await fetch('/api/doctors');
         const doctors = await response.json();
-
-        if (doctors.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="6" class="p-10 text-center text-gray-500">No doctors registered.</td></tr>`;
-            return;
-        }
 
         tableBody.innerHTML = doctors.map(d => `
             <tr class="hover:bg-gray-50 transition border-b border-gray-100">
@@ -130,13 +122,67 @@ async function loadFullDoctorList() {
         `).join('');
     } catch (e) {
         console.error("Error loading doctor database:", e);
-        tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-red-500 text-center">Error loading doctor database.</td></tr>`;
     }
 }
 
 // =====================================================
 // 📝 FORM HANDLER FUNCTIONS
 // =====================================================
+
+/**
+ * Update Logged-in Doctor Profile
+ */
+async function handleProfileUpdate(event) {
+    event.preventDefault();
+    
+    // Get ID from hidden field
+    const idElem = document.getElementById('profId');
+    const doctorId = idElem ? idElem.value : null;
+    
+    console.log("Syncing Profile Update for Doctor ID:", doctorId);
+
+    if (!doctorId || doctorId === "null" || doctorId === "") {
+        alert("Session error: Doctor ID not detected. Please log out and back in.");
+        return;
+    }
+
+    const updatedData = {
+        name: document.getElementById('profName').value,
+        gender: document.getElementById('profGender').value,
+        experience: parseInt(document.getElementById('profExp').value) || 0,
+        specialization: document.getElementById('profSpec').value,
+        consultationFee: parseFloat(document.getElementById('profFee').value) || 0.0,
+        hospitalName: document.getElementById('profHosp').value,
+        availability: document.getElementById('profAvail').value,
+        // Convert qualification string to List<String>
+        qualification: document.getElementById('profQual').value.split(',').map(s => s.trim()).filter(s => s !== ""),
+        address: document.getElementById('profAddr').value,
+        email: document.getElementById('profEmail').value,
+        password: document.getElementById('profPass').value 
+    };
+
+    try {
+        // Sends PUT request to DoctorController
+        const response = await fetch(`/api/doctors/${doctorId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedData)
+        });
+
+        if (response.ok) {
+            alert('Profile updated successfully!');
+            // Reload /my-profile so Thymeleaf pulls the refreshed session data
+            window.location.href = '/my-profile'; 
+        } else {
+            const errorMsg = await response.text();
+            console.error("Update rejected by server:", response.status, errorMsg);
+            alert('Update failed: ' + errorMsg);
+        }
+    } catch (err) {
+        console.error('Network error during update:', err);
+        alert('Could not connect to the server.');
+    }
+}
 
 async function handlePatientSubmit(event) {
     event.preventDefault();
@@ -182,12 +228,12 @@ async function handleDoctorSubmit(event) {
     const doctorData = {
         name: document.getElementById('name').value,
         specialization: document.getElementById('specialization').value,
-        experience: parseInt(document.getElementById('experience').value),
-        qualification: document.getElementById('qualification').value.split(',').map(s => s.trim()),
+        experience: parseInt(document.getElementById('experience').value) || 0,
+        qualification: document.getElementById('qualification').value.split(',').map(s => s.trim()).filter(s => s !== ""),
         gender: document.getElementById('gender').value,
         phone: document.getElementById('phone').value,
         email: document.getElementById('email').value,
-        consultationFee: parseFloat(document.getElementById('consultationFee').value),
+        consultationFee: parseFloat(document.getElementById('consultationFee').value) || 0.0,
         availability: document.getElementById('availability').value,
         hospitalName: document.getElementById('hospitalName').value,
         address: document.getElementById('address').value
@@ -204,11 +250,9 @@ async function handleDoctorSubmit(event) {
             alert('Doctor profile created successfully!');
             window.location.href = '/doctordb';
         } else {
-            const errorText = await response.text();
-            alert('Failed to save doctor profile: ' + errorText);
+            alert('Failed to save doctor profile.');
         }
     } catch (err) {
         console.error('Network error:', err);
-        alert('Network error while saving doctor profile.');
     }
 }

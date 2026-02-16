@@ -20,20 +20,22 @@ public class Doctor {
     private List<String> qualification;
     private String gender;
     private String phone;
-    
     private String email;
+    
+    // NEW FIELD
+    private String password;
+    
     private Double consultationFee;
     private String availability;
     private String hospitalName;
-    // rating field removed
     private String address;
 
     // Default Constructor
     public Doctor() {}
 
-    // Updated Parameterized Constructor (rating removed)
+    // Updated Parameterized Constructor (Includes password)
     public Doctor(String name, String specialization, Integer experience, List<String> qualification, 
-                  String gender, String phone, String email, Double consultationFee, 
+                  String gender, String phone, String email, String password, Double consultationFee, 
                   String availability, String hospitalName, String address) {
         this.name = name;
         this.specialization = specialization;
@@ -42,6 +44,7 @@ public class Doctor {
         this.gender = gender;
         this.phone = phone;
         this.email = email;
+        this.password = password;
         this.consultationFee = consultationFee;
         this.availability = availability;
         this.hospitalName = hospitalName;
@@ -73,6 +76,10 @@ public class Doctor {
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
+    // Getter & Setter for Password
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
     public Double getConsultationFee() { return consultationFee; }
     public void setConsultationFee(Double consultationFee) { this.consultationFee = consultationFee; }

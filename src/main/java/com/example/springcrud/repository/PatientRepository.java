@@ -26,9 +26,11 @@ public interface PatientRepository extends MongoRepository<Patient, String> {
 
     List<Patient> findByGenderIgnoreCase(String gender);
 
-    List<Patient> findByPhoneNumber(String phoneNumber);
+    // Renamed from findByPhoneNumber
+    List<Patient> findByPhone(String phone);
 
-    List<Patient> findByPhoneNumberContaining(String digits);
+    // Renamed from findByPhoneNumberContaining
+    List<Patient> findByPhoneContaining(String digits);
 
 
     // =====================================================
@@ -61,18 +63,23 @@ public interface PatientRepository extends MongoRepository<Patient, String> {
 
 
     // =====================================================
-    // ✅ LOGIN SUPPORT
+    // ✅ LOGIN SUPPORT (Updated with Phone Rename & Password)
     // =====================================================
 
-    Optional<Patient> findByPatientIdAndDateOfBirthAndPhoneNumber(
+    // New login method using password
+    Optional<Patient> findByEmailAddressAndPassword(String emailAddress, String password);
+
+    // Updated with phone rename
+    Optional<Patient> findByPatientIdAndDateOfBirthAndPhone(
             String patientId,
             LocalDate dateOfBirth,
-            String phoneNumber
+            String phone
     );
 
-    Optional<Patient> findByEmailAddressAndPhoneNumber(
+    // Updated with phone rename
+    Optional<Patient> findByEmailAddressAndPhone(
             String emailAddress,
-            String phoneNumber
+            String phone
     );
 
 
@@ -84,7 +91,8 @@ public interface PatientRepository extends MongoRepository<Patient, String> {
 
     boolean existsByEmailAddress(String emailAddress);
 
-    boolean existsByPhoneNumber(String phoneNumber);
+    // Renamed from existsByPhoneNumber
+    boolean existsByPhone(String phone);
 
 
     // =====================================================

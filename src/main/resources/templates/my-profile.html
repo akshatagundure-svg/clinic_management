@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | HealthFlow Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-gradient { background: #0f172a; }
+        .app-bg { background-color: #f1f5f9; background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px); background-size: 24px 24px; }
+        .glass-card { background: #ffffff; border: 1px solid #e2e8f0; }
+    </style>
+</head>
+<body class="app-bg text-slate-900">
+
+    <aside class="sidebar-gradient fixed left-0 top-0 h-screen w-64 text-white shadow-2xl z-50">
+        <div class="p-6 text-center border-b border-slate-700/50">
+            <h2 class="text-xl font-bold tracking-wider text-blue-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+            <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1 font-semibold">Doctor Portal</p>
+        </div>
+        <nav class="mt-6 px-4 space-y-1">
+            <a th:href="@{/doctordb}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-home mr-3 text-blue-400 group-hover:scale-110"></i> Dashboard
+            </a>
+            
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Clinical Tools</div>
+            <a th:href="@{/add-patient}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-user-plus mr-3 text-blue-400"></i> Add Patient
+            </a>
+            <a th:href="@{/patientinfo}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-users mr-3 text-blue-400"></i> Patient List
+            </a>
+
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Account</div>
+            <a th:href="@{/my-profile}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-900/20">
+                <i class="fas fa-user-md mr-3"></i> My Profile
+            </a>
+        </nav>
+    </aside>
+
+    <main class="ml-64 p-8 min-h-screen">
+        <header class="flex justify-between items-center mb-10 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Professional Profile</h1>
+                <p class="text-slate-500 text-xs mt-1">Manage your credentials, availability, and account security</p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button onclick="handleLogout()" class="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-xl font-bold text-xs transition-all uppercase">
+                    Logout
+                </button>
+                <div class="h-10 w-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
+                    <span th:text="${#strings.substring(doctorName,0,1)}">D</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="max-w-5xl mx-auto pb-10">
+            <form id="profileUpdateForm" class="space-y-6">
+                <input type="hidden" id="profId" th:if="${doctor != null}" th:value="${doctor.id}">
+
+                <div class="glass-card p-8 rounded-3xl shadow-sm border border-slate-200">
+                    
+                    <h3 class="text-sm font-bold text-blue-600 uppercase tracking-widest mb-6 flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i> Basic Information
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Full Name</label>
+                            <input type="text" id="profName" th:value="${doctor.name}" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Gender</label>
+                            <select id="profGender" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="Male" th:selected="${doctor.gender == 'Male'}">Male</option>
+                                <option value="Female" th:selected="${doctor.gender == 'Female'}">Female</option>
+                                <option value="Other" th:selected="${doctor.gender == 'Other'}">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Experience (Years)</label>
+                            <input type="number" id="profExp" th:value="${doctor.experience}" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-blue-600 uppercase tracking-widest mb-6 flex items-center border-t border-slate-100 pt-8">
+                        <i class="fas fa-stethoscope mr-2"></i> Medical Practice
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Specialization</label>
+                            <input type="text" id="profSpec" th:value="${doctor.specialization}" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Consultation Fee ($)</label>
+                            <input type="number" step="0.01" id="profFee" th:value="${doctor.consultationFee}" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Hospital/Clinic Name</label>
+                            <input type="text" id="profHosp" th:value="${doctor.hospitalName}" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Availability</label>
+                            <input type="text" id="profAvail" th:value="${doctor.availability}" placeholder="e.g. Mon-Fri, 9AM-5PM" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Qualifications (Comma separated)</label>
+                            <input type="text" id="profQual" th:value="${doctor.qualification != null ? #strings.listJoin(doctor.qualification, ', ') : ''}" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Clinic Address</label>
+                            <textarea id="profAddr" th:text="${doctor.address}" rows="2" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                        </div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-blue-600 uppercase tracking-widest mb-6 flex items-center border-t border-slate-100 pt-8">
+                        <i class="fas fa-lock mr-2"></i> Account & Security
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Email</label>
+                            <input type="email" id="profEmail" th:value="${doctor.email}" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Phone (Locked)</label>
+                            <input type="text" th:value="${doctor.phone}" readonly class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-sm text-slate-400 cursor-not-allowed">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Change Password</label>
+                            <input type="password" id="profPass" th:value="${doctor.password}" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-4 mt-12">
+                        <button type="button" onclick="location.href='/doctordb'" class="px-6 py-4 text-slate-400 font-bold hover:text-slate-600 transition-all text-xs">CANCEL</button>
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-2xl font-bold shadow-lg shadow-blue-900/20 transition-all transform active:scale-95 text-xs tracking-widest uppercase">
+                            <i class="fas fa-save mr-2"></i> Save Changes
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="/js/app.js"></script>
+    <script>
+        function handleLogout() {
+            localStorage.clear();
+            window.location.href = '/login';
+        }
+    </script>
+</body>
+</html>

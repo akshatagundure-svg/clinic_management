@@ -1,7 +1,12 @@
 package com.example.springcrud.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+
+import com.example.springcrud.model.Doctor;
+
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class WebController{
@@ -69,8 +74,18 @@ public String showClinicListPage() {
 }
 
 @GetMapping("/doctordb")
-    public String showDoctorDB() {
-        return "index"; 
+    public String showDoctorDB(HttpSession session, Model model) {
+        // Retrieve name from session
+        String doctorName = (String) session.getAttribute("doctorName");
+
+        // Security: Redirect to login if they haven't logged in yet
+        if (doctorName == null) {
+            return "redirect:/login";
+        }
+
+        // Pass name to index.html (Thymeleaf)
+        model.addAttribute("doctorName", doctorName);
+        return "index"; // renders index.html
     }
     @GetMapping("/add-patient")
     public String showAddPatient() {
@@ -87,6 +102,24 @@ public String showAddDoctor() {
 @GetMapping("/doctorinfo")
 public String showDoctorInfo() {
     return "doctorinfo"; // Points to templates/doctorinfo.html
+}
+@GetMapping("/login")
+    public String loginPage() {
+        return "login"; // Returns login.html from templates folder
+    }
+@GetMapping("/my-profile")
+public String showMyProfile(HttpSession session, Model model) {
+    // Retrieve the doctor object saved during login
+    Doctor doctor = (Doctor) session.getAttribute("loggedInDoctor");
+
+    if (doctor == null) {
+        return "redirect:/login";
+    }
+
+    // Pass the full doctor object (which contains the ID) to Thymeleaf
+    model.addAttribute("doctor", doctor);
+    model.addAttribute("doctorName", doctor.getName());
+    return "my-profile"; 
 }
     
 

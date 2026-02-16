@@ -70,7 +70,8 @@ public class PatientController {
             patients = patients.stream().filter(p -> p.getBloodGroup() != null && p.getBloodGroup().equalsIgnoreCase(bloodGroup)).collect(Collectors.toList());
         }
         if (phoneContains != null && !phoneContains.isEmpty()) {
-            patients = patients.stream().filter(p -> p.getPhoneNumber() != null && p.getPhoneNumber().contains(phoneContains)).collect(Collectors.toList());
+            // Renamed from getPhoneNumber to getPhone
+            patients = patients.stream().filter(p -> p.getPhone() != null && p.getPhone().contains(phoneContains)).collect(Collectors.toList());
         }
         return ResponseEntity.ok(patients);
     }
@@ -94,7 +95,6 @@ public class PatientController {
 
     /**
      * Fetch single patient by MongoDB ID
-     * (Placed after /count and /search to avoid path conflict)
      */
     @GetMapping("/{id}")
     public ResponseEntity<Patient> getPatientById(@PathVariable String id) {
@@ -105,7 +105,6 @@ public class PatientController {
 
     /**
      * CREATE: Full Form Submission
-     * Handles ID generation to prevent Duplicate Key errors
      */
     @PostMapping
     public ResponseEntity<Patient> createPatient(@RequestBody Patient patient) {
@@ -125,7 +124,8 @@ public class PatientController {
      */
     @PostMapping("/register")
     public ResponseEntity<Patient> registerPatient(@RequestBody Patient patient) {
-        if (patient.getFullName() == null || patient.getPhoneNumber() == null) {
+        // Renamed check for phone
+        if (patient.getFullName() == null || patient.getPhone() == null) {
             return ResponseEntity.badRequest().build();
         }
         ensureUniquePatientId(patient);
@@ -141,9 +141,10 @@ public class PatientController {
             .map(p -> {
                 p.setPatientId(d.getPatientId());
                 p.setFullName(d.getFullName());
+                p.setPassword(d.getPassword()); // Added password update support
                 p.setDateOfBirth(d.getDateOfBirth());
                 p.setGender(d.getGender());
-                p.setPhoneNumber(d.getPhoneNumber());
+                p.setPhone(d.getPhone()); // Renamed field
                 p.setEmailAddress(d.getEmailAddress());
                 p.setResidentialAddress(d.getResidentialAddress());
                 p.setEmergencyContact(d.getEmergencyContact());

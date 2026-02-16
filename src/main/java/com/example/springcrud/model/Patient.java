@@ -2,13 +2,13 @@ package com.example.springcrud.model;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.ArrayList; // Added
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonFormat; // Added for field mapping
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Document(collection = "patients")
@@ -20,19 +20,25 @@ public class Patient {
 
     private String patientId; 
     private String fullName;
+    
+    // NEW FIELD
+    private String password;
 
-   // Keep the JSON format for output, but Jackson will now try to parse input intelligently
-@JsonFormat(pattern = "yyyy-MM-dd")
-private LocalDate dateOfBirth;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dateOfBirth;
 
     private String gender;
-    private String phoneNumber;
+
+    // RENAMED FIELD
+    // Use @Field if you want to keep the existing data in MongoDB named "phoneNumber"
+    // @Field("phoneNumber") 
+    private String phone;
+
     private String emailAddress;
     private String residentialAddress;
     private String emergencyContact;
     private String bloodGroup;
 
-    // Initialize lists as empty ArrayLists to prevent NullPointerExceptions during filtering
     private List<String> allergies = new ArrayList<>();
     private List<String> chronicDiseases = new ArrayList<>();
     private List<String> currentMedications = new ArrayList<>();
@@ -42,7 +48,7 @@ private LocalDate dateOfBirth;
 
     public Patient() {}
 
-    // ✅ Dynamic Age
+    // Dynamic Age
     public Integer getAge() {
         if (this.dateOfBirth != null) {
             return Period.between(this.dateOfBirth, LocalDate.now()).getYears();
@@ -58,11 +64,14 @@ private LocalDate dateOfBirth;
     public String getPatientId() { return patientId; }
     public void setPatientId(String patientId) { this.patientId = patientId; }
 
-    // Guard against null names during search
     public String getFullName() { 
         return fullName != null ? fullName : ""; 
     }
     public void setFullName(String fullName) { this.fullName = fullName; }
+
+    // Getter & Setter for Password
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
     public LocalDate getDateOfBirth() { return dateOfBirth; }
     public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
@@ -70,8 +79,9 @@ private LocalDate dateOfBirth;
     public String getGender() { return gender; }
     public void setGender(String gender) { this.gender = gender; }
 
-    public String getPhoneNumber() { return phoneNumber; }
-    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+    // Updated Getter & Setter for Phone
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
 
     public String getEmailAddress() { return emailAddress; }
     public void setEmailAddress(String emailAddress) { this.emailAddress = emailAddress; }
@@ -85,7 +95,6 @@ private LocalDate dateOfBirth;
     public String getBloodGroup() { return bloodGroup; }
     public void setBloodGroup(String bloodGroup) { this.bloodGroup = bloodGroup; }
 
-    // Ensures we never return a null list
     public List<String> getAllergies() { 
         return allergies != null ? allergies : new ArrayList<>(); 
     }
