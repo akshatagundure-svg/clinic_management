@@ -31,6 +31,8 @@ public interface MedicalTestRepository extends MongoRepository<MedicalTest, Stri
     // 7. Check if any tests exist for a patient
     boolean existsByPatientId(String patientId);
 
+    long countByDoctorId(String doctorId);
+
     // --- COMBINED FILTER METHODS ---
 
     /**

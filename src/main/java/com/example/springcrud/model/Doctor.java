@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class Doctor {
 
     @Id
-    private String id; 
+    private String doctorId; 
 
     private String name;
     private String specialization;
@@ -21,10 +21,7 @@ public class Doctor {
     private String gender;
     private String phone;
     private String email;
-    
-    // NEW FIELD
-    private String password;
-    
+    private String password;   // login password
     private Double consultationFee;
     private String availability;
     private String hospitalName;
@@ -33,10 +30,12 @@ public class Doctor {
     // Default Constructor
     public Doctor() {}
 
-    // Updated Parameterized Constructor (Includes password)
-    public Doctor(String name, String specialization, Integer experience, List<String> qualification, 
-                  String gender, String phone, String email, String password, Double consultationFee, 
+    // Constructor
+    public Doctor(String name, String specialization, Integer experience,
+                  List<String> qualification, String gender, String phone,
+                  String email, String password, Double consultationFee,
                   String availability, String hospitalName, String address) {
+
         this.name = name;
         this.specialization = specialization;
         this.experience = experience;
@@ -53,8 +52,8 @@ public class Doctor {
 
     // -------- Getters & Setters --------
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public String getDoctorId() { return doctorId; }
+    public void setDoctorId(String doctorId) { this.doctorId = doctorId; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -77,7 +76,6 @@ public class Doctor {
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 
-    // Getter & Setter for Password
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 
@@ -92,15 +90,4 @@ public class Doctor {
 
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
-
-    @Override
-    public String toString() {
-        return "Doctor{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", specialization='" + specialization + '\'' +
-                ", hospitalName='" + hospitalName + '\'' +
-                ", email='" + email + '\'' +
-                '}';
-    }
 }

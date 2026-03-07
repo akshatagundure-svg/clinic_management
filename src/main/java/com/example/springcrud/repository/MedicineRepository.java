@@ -30,6 +30,7 @@ public interface MedicineRepository extends MongoRepository<Medicine, String> {
     List<Medicine> findByPriceLessThanEqual(Double price);
 
     // 7. Check if a Medicine ID already exists for validation
+    // Already present in your repository
     boolean existsByMedId(String medId);
 
     // --- COMBINED FILTER METHODS ---

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Clinical History | HealthFlow Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        .glass-card { background: #ffffff; border: 1px solid #e2e8f0; }
+    </style>
+</head>
+<body class="p-8">
+    <input type="hidden" id="doctorId" th:value="${doctorId}">
+    
+    <div class="max-w-6xl mx-auto">
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">Prescription History</h1>
+                <p class="text-slate-500 text-sm">Viewing clinical records for Patient: <span id="patIdDisplay" class="font-bold text-blue-600">...</span></p>
+            </div>
+            <button onclick="history.back()" class="bg-slate-200 px-4 py-2 rounded-lg font-bold text-xs">BACK</button>
+        </header>
+
+        <div id="historyContainer" class="space-y-6">
+            <div class="p-20 text-center text-slate-400">
+                <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                <p>Loading medical history...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const patientId = urlParams.get('patientId');
+            const doctorId = document.getElementById('doctorId').value;
+            document.getElementById('patIdDisplay').innerText = patientId;
+
+            try {
+                // Fetch prescriptions for this patient
+                const response = await fetch(`/api/prescriptions/patient/${patientId}`);
+                const data = await response.json();
+                
+                // Filter locally for this particular doctor
+                const filtered = data.filter(p => p.currentDoctor && p.currentDoctor.doctorId === doctorId);
+
+                const container = document.getElementById('historyContainer');
+                if (filtered.length === 0) {
+                    container.innerHTML = `<div class="glass-card p-10 rounded-2xl text-center text-slate-400">No records found from your clinic for this patient.</div>`;
+                    return;
+                }
+
+                container.innerHTML = filtered.reverse().map(p => `
+                    <div class="glass-card p-6 rounded-2xl shadow-sm relative overflow-hidden border-l-4 border-blue-500">
+                        <div class="flex justify-between mb-4">
+                            <div>
+                                <span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest">Prescription ID: ${p.id}</span>
+                                <h3 class="text-lg font-bold text-slate-800 mt-1">${p.diagnosis ? p.diagnosis.confirmedDiagnosis : 'General Consultation'}</h3>
+                            </div>
+                            <div class="text-right">
+                                <span class="px-3 py-1 bg-green-50 text-green-600 rounded-full text-[10px] font-bold uppercase">${p.recordStatus}</span>
+                                <p class="text-[10px] text-slate-400 mt-1">${new Date(p.audit.createdAt).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 bg-slate-50 p-4 rounded-xl">
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase">Medications</p>
+                                <ul class="text-sm text-slate-600 mt-1">
+                                    ${p.medications.map(m => `<li>• <b>${m.medicineName}</b> - ${m.dosage} (${m.frequency})</li>`).join('')}
+                                </ul>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase">Notes</p>
+                                <p class="text-sm text-slate-600 mt-1">${p.diagnosis.severity} severity condition.</p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+</html>

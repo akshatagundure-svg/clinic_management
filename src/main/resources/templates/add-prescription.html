@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issue Prescription | HealthFlow Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-gradient { background: #0f172a; }
+        .glass-card { background: #ffffff; border: 1px solid #e2e8f0; }
+        .app-bg { background-color: #f1f5f9; background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px); background-size: 24px 24px; }
+        .section-tag { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #3b82f6; }
+        .med-row { transition: all 0.2s ease; }
+        .med-row:hover { border-color: #3b82f6; box-shadow: 0 4px 12px -2px rgba(59, 130, 246, 0.1); }
+    </style>
+</head>
+<body class="app-bg text-slate-900 overflow-x-hidden">
+
+    <input type="hidden" id="profId" th:value="${doctorId}">
+    <span id="doctorNameDisplay" class="hidden" th:text="${doctorName}"></span>
+
+    <aside class="sidebar-gradient fixed left-0 top-0 h-screen w-64 text-white shadow-2xl z-50">
+        <div class="p-6 text-center border-b border-slate-700/50">
+            <h2 class="text-xl font-bold tracking-wider text-blue-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+            <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1 font-semibold">Doctor Portal</p>
+        </div>
+        
+        <nav class="mt-6 px-4 space-y-1">
+            <a th:href="@{/doctordb}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl bg-blue-600 text-white cursor-pointer shadow-lg shadow-blue-900/20">
+                <i class="fas fa-chart-line mr-3"></i> Analytics
+            </a>
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Management</div>
+            <a th:href="@{/clinicinfo}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-hospital mr-3 text-blue-400"></i> My Clinics
+            </a>
+            <a th:href="@{/patientinfo}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-users mr-3 text-blue-400"></i> Patient List
+            </a>
+            <a th:href="@{/medical-tests-dashboard}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-flask mr-3 text-blue-400"></i> Laboratory
+            </a>
+            <a th:href="@{/inventory}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-pills mr-3 text-blue-400"></i> Pharmacy
+            </a>
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Settings</div>
+            <a th:href="@{/my-profile}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-user-circle mr-3 text-blue-400"></i> Profile
+            </a>
+        </nav>
+    </aside>
+
+
+    <main class="ml-64 p-8 min-h-screen">
+        <header class="flex justify-between items-center mb-10 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Issue Prescription</h1>
+                <p class="text-slate-500 text-xs mt-1">Prescribing for Patient: <span id="activePatientLabel" class="font-bold text-blue-600">Loading...</span></p>
+            </div>
+            <div class="text-right">
+                <p class="text-[10px] font-bold text-slate-400 uppercase">Issuing Doctor</p>
+                <p class="text-sm font-bold text-slate-700" th:text="${doctorName}">Doctor</p>
+            </div>
+        </header>
+
+        <form id="prescriptionForm" class="w-full max-w-5xl space-y-6 mx-auto">
+            <div class="glass-card p-8 rounded-3xl shadow-sm">
+                <h3 class="section-tag mb-6 border-l-4 border-blue-500 pl-3">Diagnosis Details</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Provisional Diagnosis</label>
+                        <input type="text" id="provisionalDiagnosis" class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 outline-none text-sm" placeholder="Initial medical hypothesis...">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Confirmed Diagnosis</label>
+                        <input type="text" id="confirmedDiagnosis" required class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 outline-none text-sm" placeholder="Final confirmed finding...">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Severity</label>
+                        <select id="severity" class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 outline-none text-sm">
+                            <option value="Mild">Mild</option>
+                            <option value="Moderate">Moderate</option>
+                            <option value="Acute">Acute / Severe</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">ICD Code (Optional)</label>
+                        <input type="text" id="icdCode" class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 outline-none text-sm" placeholder="e.g. J02.9">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Record Status</label>
+                        <select id="recordStatus" class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 outline-none text-sm">
+                            <option value="Active">Active Treatment</option>
+                            <option value="Completed">Clinical Archive</option>
+                            <option value="Draft">Draft Mode</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card p-8 rounded-3xl shadow-sm">
+                <h3 class="section-tag mb-6 border-l-4 border-blue-500 pl-3">Treatment Timeline</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Start Date</label>
+                        <input type="datetime-local" id="startDate" required class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Expected Completion</label>
+                        <input type="datetime-local" id="endDate" required class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 outline-none text-sm">
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card p-8 rounded-3xl shadow-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="section-tag border-l-4 border-blue-500 pl-3">Medication Schedule</h3>
+                    <button type="button" onclick="addMedRow()" class="text-blue-600 font-bold text-[10px] uppercase hover:underline">+ Add Medicine Card</button>
+                </div>
+                <div id="medContainer" class="space-y-4"></div>
+            </div>
+
+            <div class="glass-card p-8 rounded-3xl shadow-sm">
+                <h3 class="section-tag mb-6 border-l-4 border-blue-500 pl-3">Follow-Up Plan</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                        <input type="checkbox" id="followUpRequired" class="w-5 h-5 rounded border-slate-300 text-blue-600">
+                        <label class="text-sm font-medium text-slate-700">Follow-up visit required</label>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Follow-up Date</label>
+                        <input type="datetime-local" id="followUpDate" class="w-full px-5 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 outline-none text-sm">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-4 pb-10">
+                <button type="submit" class="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-blue-700 transition-all">Save Prescription Record</button>
+                <button type="button" onclick="history.back()" class="px-10 py-4 rounded-2xl bg-white border border-slate-200 font-bold text-slate-400">Cancel</button>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        let availableMedicines = [];
+
+        // STRICT FORMATTER for OffsetDateTime (yyyy-MM-dd'T'HH:mm:ss.SSSXXX)
+        const toISO = (val) => {
+    if (!val) return null;
+    const date = new Date(val);
+    if (isNaN(date.getTime())) return null;
+
+    const pad = (num) => (num < 10 ? '0' : '') + num;
+    const offset = -date.getTimezoneOffset();
+    const diff = offset >= 0 ? '+' : '-';
+    const absOffset = Math.abs(offset);
+    const tzHours = pad(Math.floor(absOffset / 60));
+    const tzMin = pad(absOffset % 60);
+
+    return date.getFullYear() +
+        '-' + pad(date.getMonth() + 1) +
+        '-' + pad(date.getDate()) +
+        'T' + pad(date.getHours()) +
+        ':' + pad(date.getMinutes()) +
+        ':' + pad(date.getSeconds()) +
+        '.000' + diff + tzHours + ':' + tzMin;
+};
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const patientId = urlParams.get('patientId');
+            if (patientId) document.getElementById('activePatientLabel').innerText = patientId;
+
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('startDate').value = now.toISOString().slice(0, 16);
+            
+            try {
+                const response = await fetch('/api/medicines');
+                if(response.ok) { availableMedicines = await response.json(); }
+            } catch (err) { console.error("Error loading medicines:", err); }
+            addMedRow();
+        });
+
+        function addMedRow() {
+            const container = document.getElementById('medContainer');
+            const row = document.createElement('div');
+            row.className = "med-row grid grid-cols-1 md:grid-cols-5 gap-4 p-5 bg-white rounded-2xl border border-slate-200 items-end shadow-sm";
+            
+            const options = availableMedicines.map(m => 
+                `<option value="${m.name}" data-dosage="${m.dosage || ''}" data-route="${m.route || 'Oral'}">${m.name}</option>`
+            ).join('');
+
+            row.innerHTML = `
+                <div>
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Select Medicine</label>
+                    <select onchange="handleMedSelection(this)" class="med-name-select w-full px-4 py-2 rounded-xl border border-slate-200 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">-- Choose Medicine --</option>
+                        ${options}
+                        <option value="CUSTOM_NEW">-- Type Custom --</option>
+                    </select>
+                    <input type="text" class="med-name-input hidden mt-2 w-full px-4 py-2 rounded-xl border border-slate-200 text-sm" placeholder="Enter manual name">
+                </div>
+                <div>
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Dosage</label>
+                    <input type="text" class="med-dosage w-full px-4 py-2 rounded-xl border border-slate-200 text-sm" placeholder="e.g. 500mg">
+                </div>
+                <div>
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Route</label>
+                    <select class="med-route w-full px-4 py-2 rounded-xl border border-slate-200 text-sm outline-none">
+                        <option value="Oral">Oral</option>
+                        <option value="IV">IV</option>
+                        <option value="IM">IM</option>
+                        <option value="Topical">Topical</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Frequency</label>
+                    <input type="text" class="med-freq w-full px-4 py-2 rounded-xl border border-slate-200 text-sm" placeholder="e.g. 1-0-1">
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="flex-1">
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Instructions</label>
+                        <input type="text" class="med-inst w-full px-4 py-2 rounded-xl border border-slate-200 text-sm" placeholder="After food">
+                    </div>
+                    <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-red-400 hover:text-red-600 transition-colors p-2">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+
+        function handleMedSelection(select) {
+            const row = select.closest('.med-row');
+            const customInput = row.querySelector('.med-name-input');
+            const selectedOption = select.options[select.selectedIndex];
+            
+            if (select.value === "CUSTOM_NEW") {
+                customInput.classList.remove('hidden');
+                customInput.required = true;
+            } else {
+                customInput.classList.add('hidden');
+                customInput.required = false;
+                if (select.value !== "") {
+                    row.querySelector('.med-dosage').value = selectedOption.getAttribute('data-dosage');
+                    row.querySelector('.med-route').value = selectedOption.getAttribute('data-route');
+                }
+            }
+        }
+
+        document.getElementById('prescriptionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const patientId = new URLSearchParams(window.location.search).get('patientId');
+            
+            // CLEAN MEDICATION LIST: Prevent null objects
+            const medicationList = Array.from(document.querySelectorAll('.med-row')).map(row => {
+                const select = row.querySelector('.med-name-select');
+                const manualInput = row.querySelector('.med-name-input');
+                const name = select.value === "CUSTOM_NEW" ? manualInput.value : select.value;
+
+                if (!name) return null; 
+
+                return {
+                    medicineName: name,
+                    dosage: row.querySelector('.med-dosage').value || "As directed",
+                    route: row.querySelector('.med-route').value || "Oral",
+                    frequency: row.querySelector('.med-freq').value || "1-0-1",
+                    instructions: row.querySelector('.med-inst').value || ""
+                };
+            }).filter(med => med !== null);
+
+            if (medicationList.length === 0) {
+                alert("Please add at least one medication.");
+                return;
+            }
+
+const payload = {
+    recordStatus: document.getElementById('recordStatus').value,
+    doctorChangeAllowed: true,
+    // Ensure these are OBJECTS as defined in your Prescription.java
+    patient: { 
+        patientId: patientId 
+    }, 
+    currentDoctor: { 
+        doctorId: document.getElementById('profId').value,
+        fullName: document.getElementById('doctorNameDisplay').innerText 
+    },
+    diagnosis: { 
+        provisionalDiagnosis: document.getElementById('provisionalDiagnosis').value,
+        confirmedDiagnosis: document.getElementById('confirmedDiagnosis').value,
+        icdCode: document.getElementById('icdCode').value,
+        severity: document.getElementById('severity').value 
+    },
+    treatmentTimeline: {
+        treatmentStartDate: toISO(document.getElementById('startDate').value),
+        expectedCompletionDate: toISO(document.getElementById('endDate').value),
+        treatmentStatus: "STARTED"
+    },
+    medications: medicationList, // Already an array of objects
+    followUp: {
+        followUpRequired: document.getElementById('followUpRequired').checked,
+        followUpDate: toISO(document.getElementById('followUpDate').value)
+    },
+    audit: { 
+    createdAt: toISO(new Date()), // Use the helper to ensure +05:30 style offset
+    createdBy: document.getElementById('profId').value
+}
+};
+
+            try {
+                const response = await fetch('/api/prescriptions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    alert("Success: Prescription record finalized.");
+                    window.location.href = "/patientinfo";
+                } else {
+                    const errorText = await response.text();
+                    console.error("Server Crash Detail:", errorText);
+                    alert("Submission Failed. Check terminal for date/mapping errors.");
+                }
+            } catch (err) {
+                console.error("Network Error:", err);
+                alert("Connection failed. Is Spring Boot running?");
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinic Details | HealthFlow Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-gradient { background: #0f172a; }
+        .glass-card { background: #ffffff; border: 1px solid #e2e8f0; }
+        .app-bg { background-color: #f1f5f9; background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px); background-size: 24px 24px; }
+        .detail-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; }
+        .detail-value { font-size: 14px; font-weight: 600; color: #1e293b; }
+        .tag { font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 99px; background: #eff6ff; color: #2563eb; }
+    </style>
+</head>
+
+<body class="app-bg text-slate-900 overflow-x-hidden">
+    <input type="hidden" id="targetId" th:value="${targetClinicId}">
+
+    <aside class="sidebar-gradient fixed left-0 top-0 h-screen w-64 text-white shadow-2xl z-50">
+        <div class="p-6 text-center border-b border-slate-700/50">
+            <h2 class="text-xl font-bold tracking-wider text-blue-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+            <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1 font-semibold">Doctor Portal</p>
+        </div>
+        
+        <nav class="mt-6 px-4 space-y-1">
+            <a th:href="@{/doctordb}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl bg-blue-600 text-white cursor-pointer shadow-lg shadow-blue-900/20">
+                <i class="fas fa-chart-line mr-3"></i> Analytics
+            </a>
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Management</div>
+            <a th:href="@{/clinicinfo}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-hospital mr-3 text-blue-400"></i> My Clinics
+            </a>
+            <a th:href="@{/patientinfo}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-users mr-3 text-blue-400"></i> Patient List
+            </a>
+            <a th:href="@{/medical-tests-dashboard}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-flask mr-3 text-blue-400"></i> Laboratory
+            </a>
+            <a th:href="@{/inventory}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-pills mr-3 text-blue-400"></i> Pharmacy
+            </a>
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Settings</div>
+            <a th:href="@{/my-profile}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-user-circle mr-3 text-blue-400"></i> Profile
+            </a>
+        </nav>
+    </aside>
+
+    <main class="ml-64 p-8 min-h-screen">
+        <header class="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="flex items-center">
+                <button onclick="history.back()" class="mr-4 text-slate-400 hover:text-blue-600 transition-colors">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800 tracking-tight" id="headerName">Loading...</h1>
+                    <p class="text-slate-500 text-xs mt-1">Full clinical facility profile and configuration</p>
+                </div>
+            </div>
+            <div id="statusBadgeContainer"></div>
+        </header>
+
+        <div id="detailsContent" class="hidden space-y-6 max-w-5xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-2 glass-card p-8 rounded-3xl shadow-sm">
+                    <h3 class="text-sm font-bold text-slate-800 mb-6 flex items-center">
+                        <i class="fas fa-info-circle text-blue-500 mr-2"></i> Facility Overview
+                    </h3>
+                    <div class="grid grid-cols-2 gap-y-6">
+                        <div>
+                            <p class="detail-label">Clinic Name</p>
+                            <p class="detail-value" id="clinicName">--</p>
+                        </div>
+                        <div>
+                            <p class="detail-label">Business ID</p>
+                            <p class="detail-value text-blue-600" id="clinicId">--</p>
+                        </div>
+                        <div>
+                            <p class="detail-label">Type</p>
+                            <p class="detail-value" id="clinicType">--</p>
+                        </div>
+                        <div>
+                            <p class="detail-label">Registration No.</p>
+                            <p class="detail-value" id="regNum">--</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card p-8 rounded-3xl shadow-sm bg-blue-600 text-white border-none">
+                    <h3 class="text-sm font-bold mb-6 flex items-center opacity-80">
+                        <i class="fas fa-clock mr-2"></i> Operations
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] uppercase font-bold opacity-70">Timings</span>
+                            <span class="font-bold text-sm" id="timings">--</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-4 border-t border-white/10">
+                            <span class="text-[10px] uppercase font-bold opacity-70">Appointment</span>
+                            <span class="bg-white/20 px-3 py-1 rounded-lg text-[10px] font-bold" id="apptStatus">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-card p-8 rounded-3xl shadow-sm">
+                    <h3 class="text-sm font-bold text-slate-800 mb-6 flex items-center">
+                        <i class="fas fa-map-marker-alt text-emerald-500 mr-2"></i> Location Details
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600 text-xs">
+                                <i class="fas fa-city"></i>
+                            </div>
+                            <p class="text-sm font-medium" id="fullAddress">--</p>
+                        </div>
+                        <div class="flex items-center gap-3 pt-2">
+                            <div class="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center text-amber-600 text-xs">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <p class="text-sm font-medium" id="contactPhone">--</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card p-8 rounded-3xl shadow-sm">
+                    <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center">
+                        <i class="fas fa-concierge-bell text-purple-500 mr-2"></i> Services & Departments
+                    </h3>
+                    <div class="mb-4">
+                        <p class="detail-label mb-2">Departments</p>
+                        <div class="flex flex-wrap gap-2" id="deptTags"></div>
+                    </div>
+                    <div>
+                        <p class="detail-label mb-2">Offered Services</p>
+                        <div class="flex flex-wrap gap-2" id="serviceTags"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="loader" class="py-20 text-center">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const clinicId = document.getElementById("targetId").value;
+            if (clinicId) fetchClinicDetails(clinicId);
+        });
+
+        async function fetchClinicDetails(id) {
+            try {
+                // Fetch from your existing endpoint
+                const response = await fetch(`/api/clinics/${id}`);
+                if (!response.ok) throw new Error("Not found");
+                
+                const clinic = await response.json();
+                
+                // 1. Basic Info
+                document.getElementById("headerName").innerText = clinic.clinicName;
+                document.getElementById("clinicName").innerText = clinic.clinicName;
+                document.getElementById("clinicId").innerText = clinic.clinicId;
+                document.getElementById("clinicType").innerText = clinic.clinicType;
+                document.getElementById("regNum").innerText = clinic.registrationNumber || "N/A";
+
+                // 2. Status Badge
+                const status = clinic.status || 'ACTIVE';
+                document.getElementById("statusBadgeContainer").innerHTML = `
+                    <span class="px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-widest ${status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}">
+                        ${status}
+                    </span>
+                `;
+
+                // 3. Address & Contact
+                const addr = clinic.address;
+                document.getElementById("fullAddress").innerText = `${addr.city}, ${addr.state} - ${addr.pincode}, ${addr.country}`;
+                document.getElementById("contactPhone").innerText = clinic.contact.phone;
+
+                // 4. Timings
+                document.getElementById("timings").innerText = `${clinic.openingTime || '00:00'} - ${clinic.closingTime || '00:00'}`;
+                document.getElementById("apptStatus").innerText = clinic.appointmentRequired ? "REQUIRED" : "NOT REQUIRED";
+
+                // 5. Lists (Tags)
+                const renderTags = (containerId, items) => {
+                    const container = document.getElementById(containerId);
+                    if (!items || items.length === 0) {
+                        container.innerHTML = '<span class="text-slate-400 text-xs italic">None listed</span>';
+                        return;
+                    }
+                    container.innerHTML = items.map(item => `<span class="tag">${item}</span>`).join('');
+                };
+                renderTags("deptTags", clinic.departments);
+                renderTags("serviceTags", clinic.services);
+
+                // Show content
+                document.getElementById("loader").classList.add("hidden");
+                document.getElementById("detailsContent").classList.remove("hidden");
+
+            } catch (err) {
+                console.error(err);
+                document.body.innerHTML = `<div class="p-20 text-center"><h1 class="text-xl font-bold text-red-600">Clinic not found.</h1><button onclick="history.back()" class="mt-4 text-blue-600">Go Back</button></div>`;
+            }
+        }
+    </script>
+</body>
+</html>

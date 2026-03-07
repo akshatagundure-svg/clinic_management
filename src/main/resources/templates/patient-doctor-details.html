@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Profile | HealthFlow Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        .sidebar-gradient { background: #0f172a; }
+        .glass-card { background: #ffffff; border: 1px solid #e2e8f0; transition: all 0.3s ease; }
+        .app-bg { background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px); background-size: 24px 24px; }
+    </style>
+</head>
+<body class="app-bg text-slate-900 overflow-x-hidden">
+
+    <input type="hidden" id="doctorId" th:value="${doctorId}">
+    <input type="hidden" id="sessPatientId" th:value="${session.patientId}">
+
+    <aside class="sidebar-gradient fixed left-0 top-0 h-screen w-64 text-white z-50">
+        <div class="p-6 text-center border-b border-slate-700/50">
+            <h2 class="text-xl font-bold text-blue-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+        </div>
+        <nav class="mt-6 px-4 space-y-2">
+            <button onclick="location.href='/patient/clinics'" class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
+                <i class="fas fa-hospital mr-3 text-blue-400"></i> Clinics
+            </button>
+            <button onclick="location.href='/patient/doctors'" class="w-full flex items-center px-4 py-3 text-sm rounded-xl bg-blue-600/20 text-blue-400 transition-all">
+                <i class="fas fa-user-md mr-3 text-blue-400"></i> Doctors
+            </button>
+            <button onclick="switchTab('prescriptions')" class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
+                <i class="fas fa-file-prescription mr-3 text-blue-400"></i> Prescriptions
+            </button>
+            <button onclick="location.href='/patient-dashboard?tab=tests'" class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
+                <i class="fas fa-microscope mr-3 text-blue-400"></i> Lab Tests
+            </button>
+        </nav>
+    </aside>
+
+    <main class="ml-64 p-10 min-h-screen">
+        <div class="max-w-4xl mx-auto py-10 px-6">
+            <div id="profileContainer" class="bg-white rounded-[3rem] shadow-2xl overflow-hidden min-h-[400px]">
+                <div class="p-20 text-center text-slate-400">
+                    <i class="fas fa-spinner animate-spin text-3xl mb-4 text-blue-500"></i>
+                    <p>Fetching Doctor Details...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script th:inline="javascript">
+        const docId = document.getElementById('doctorId').value;
+        const pId = document.getElementById('sessPatientId').value;
+
+        // Navigation Helper
+        function switchTab(type) {
+            if (type === 'prescriptions') {
+                location.href = `/patient/my-prescriptions?patientId=${pId}`;
+            }
+        }
+
+        async function loadProfile() {
+            try {
+                // Fetch specific doctor data by ID
+                const res = await fetch(`/api/doctors/${docId}`);
+                if (!res.ok) throw new Error("Doctor not found");
+                const d = await res.json();
+                
+                document.getElementById('profileContainer').innerHTML = `
+                    <div class="bg-blue-600 p-12 text-white flex flex-col md:flex-row items-center gap-8 relative overflow-hidden">
+                        <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+                        
+                        <div class="w-32 h-32 bg-white/20 rounded-3xl flex items-center justify-center text-5xl font-bold backdrop-blur-md border border-white/20 shadow-xl">
+                            ${d.name.charAt(0)}
+                        </div>
+                        <div class="text-center md:text-left z-10">
+                            <h1 class="text-4xl font-black tracking-tight">Dr. ${d.name}</h1>
+                            <p class="text-blue-100 uppercase tracking-[4px] text-xs font-bold mt-2">${d.specialization}</p>
+                            <div class="flex gap-4 mt-6 justify-center md:justify-start">
+                                <span class="bg-blue-500/40 backdrop-blur-sm border border-white/20 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider">${d.gender || 'Specialist'}</span>
+                                <span class="bg-blue-500/40 backdrop-blur-sm border border-white/20 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider">${d.experience || 0} Yrs Experience</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-12 grid grid-cols-1 md:grid-cols-2 gap-12">
+                        <div class="space-y-8">
+                            <div>
+                                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Educational Background</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    ${Array.isArray(d.qualification) 
+                                        ? d.qualification.map(q => `<span class="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-200">${q}</span>`).join('') 
+                                        : `<span class="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-200">${d.qualification || 'Medical Degree'}</span>`}
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Affiliated Hospital</h4>
+                                <div class="flex items-start">
+                                    <div class="bg-blue-50 p-2 rounded-lg mr-4">
+                                        <i class="fas fa-hospital text-blue-500"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-slate-800 font-bold">${d.hospitalName || 'HealthFlow Partner Clinic'}</p>
+                                        <p class="text-sm text-slate-500 mt-1">${d.address || 'Address information not available'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Direct Contact</h4>
+                                <div class="space-y-3">
+                                    <p class="text-sm text-slate-600 flex items-center"><i class="fas fa-phone mr-4 text-blue-500 w-4"></i> ${d.phone}</p>
+                                    <p class="text-sm text-slate-600 flex items-center"><i class="fas fa-envelope mr-4 text-blue-500 w-4"></i> ${d.email}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 p-8 rounded-[2rem] border border-slate-100 shadow-inner space-y-8">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Availability Status</h4>
+                                    <p class="text-lg font-bold text-slate-800">${d.availability || 'By Appointment'}</p>
+                                </div>
+                                <div class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse shadow-sm shadow-emerald-200"></div>
+                            </div>
+                            <div>
+                                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Consultation Fee</h4>
+                                <p class="text-4xl font-black text-blue-600">₹${d.consultationFee}</p>
+                                <p class="text-[10px] text-slate-400 font-bold mt-1 uppercase">Inclusive of all taxes</p>
+                            </div>
+                            <button class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 group">
+                                BOOK AN APPOINTMENT <i class="fas fa-calendar-check ml-2 group-hover:translate-x-1 transition-transform"></i>
+                            </button>
+                            <button onclick="location.href='/patient/doctors'" class="w-full text-slate-400 text-[10px] font-bold uppercase tracking-widest hover:text-blue-600 transition-colors">
+                                <i class="fas fa-chevron-left mr-2"></i> Return to Directory
+                            </button>
+                        </div>
+                    </div>`;
+            } catch (err) {
+                console.error("Error loading profile:", err);
+                document.getElementById('profileContainer').innerHTML = `
+                    <div class="p-20 text-center text-red-500">
+                        <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
+                        <p class="font-bold">Failed to load doctor profile.</p>
+                        <button onclick="location.href='/patient/doctors'" class="mt-6 text-slate-500 font-bold underline">Go Back</button>
+                    </div>`;
+            }
+        }
+        loadProfile();
+    </script>
+</body>
+</html>

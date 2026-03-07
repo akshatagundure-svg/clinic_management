@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Medical Test | HealthFlow Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-gradient { background: #0f172a; }
+        .glass-card { background: #ffffff; border: 1px solid #e2e8f0; }
+        .app-bg {
+            background-color: #f1f5f9;
+            background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+        }
+        input, select, textarea {
+            background-color: #f8fafc !important;
+            transition: all 0.2s ease;
+        }
+        input:focus, select:focus, textarea:focus {
+            background-color: #ffffff !important;
+            border-color: #2563eb !important;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+    </style>
+</head>
+
+<body class="app-bg text-slate-900 overflow-x-hidden">
+    <input type="hidden" id="profId" th:value="${doctorId}">
+    <input type="hidden" id="targetPatientId" th:value="${targetPatientId}">
+
+    <aside class="sidebar-gradient fixed left-0 top-0 h-screen w-64 text-white shadow-2xl z-50">
+        <div class="p-6 text-center border-b border-slate-700/50">
+            <h2 class="text-xl font-bold tracking-wider text-blue-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+            <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1 font-semibold">Doctor Portal</p>
+        </div>
+        
+        <nav class="mt-6 px-4 space-y-1">
+            <a th:href="@{/doctordb}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl bg-blue-600 text-white cursor-pointer shadow-lg shadow-blue-900/20">
+                <i class="fas fa-chart-line mr-3"></i> Analytics
+            </a>
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Management</div>
+            <a th:href="@{/clinicinfo}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-hospital mr-3 text-blue-400"></i> My Clinics
+            </a>
+            <a th:href="@{/patientinfo}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-users mr-3 text-blue-400"></i> Patient List
+            </a>
+            <a th:href="@{/medical-tests-dashboard}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-flask mr-3 text-blue-400"></i> Laboratory
+            </a>
+            <a th:href="@{/inventory}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-pills mr-3 text-blue-400"></i> Pharmacy
+            </a>
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Settings</div>
+            <a th:href="@{/my-profile}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-user-circle mr-3 text-blue-400"></i> Profile
+            </a>
+        </nav>
+    </aside>
+
+    <main class="ml-64 p-8 min-h-screen">
+        <header class="flex justify-between items-center mb-10 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Order Medical Test</h1>
+                <p class="text-slate-500 text-xs mt-1">Ordering investigation for Patient: <span class="font-bold text-blue-600" th:text="${targetPatientId}">PAT-ID</span></p>
+            </div>
+            <button onclick="history.back()" class="bg-slate-50 hover:bg-slate-100 text-slate-600 px-4 py-2 rounded-xl font-bold text-xs transition-all">
+                CANCEL
+            </button>
+        </header>
+
+        <div class="max-w-4xl mx-auto">
+            <form id="medicalTestForm" class="space-y-8">
+                
+                <div class="glass-card p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex items-center mb-6">
+                        <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 mr-4">
+                            <i class="fas fa-flask text-lg"></i>
+                        </div>
+                        <h2 class="text-lg font-bold text-slate-800">Investigation Details</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Test Name</label>
+                            <input type="text" id="testName" required placeholder="e.g. Complete Blood Count (CBC)"
+                                class="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Category</label>
+                            <select id="category" required class="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm appearance-none">
+                                <option value="">Select Category</option>
+                                <option value="Hematology">Hematology</option>
+                                <option value="Biochemistry">Biochemistry</option>
+                                <option value="Radiology">Radiology</option>
+                                <option value="Microbiology">Microbiology</option>
+                                <option value="Immunology">Immunology</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Price (₹)</label>
+                            <input type="number" step="0.01" id="price" required placeholder="0.00"
+                                class="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Result Status</label>
+                            <select id="resultStatus" class="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm appearance-none">
+                                <option value="Pending">Pending</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex items-center mb-6">
+                        <div class="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center text-amber-600 mr-4">
+                            <i class="fas fa-clipboard-list text-lg"></i>
+                        </div>
+                        <h2 class="text-lg font-bold text-slate-800">Notes & Clinical History</h2>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Test Description / Reason</label>
+                            <textarea id="description" rows="3" placeholder="Clinical indications for this test..."
+                                class="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Previous History / Reference</label>
+                            <textarea id="history" rows="2" placeholder="e.g. 2025-01-10: Previous result was 12.5..."
+                                class="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end items-center gap-4 pb-12">
+                    <button type="reset" class="text-slate-400 hover:text-slate-600 text-sm font-bold transition-all px-6">
+                        RESET FORM
+                    </button>
+                    <button type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-blue-900/20 transition-all transform active:scale-95">
+                        <i class="fas fa-check-circle mr-2"></i> SUBMIT TEST ORDER
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("medicalTestForm");
+
+            form.addEventListener("submit", async function (e) {
+                e.preventDefault();
+
+                // Retrieve context from hidden inputs
+                const doctorId = document.getElementById("profId")?.value;
+                const patientId = document.getElementById("targetPatientId")?.value;
+
+                if (!doctorId || !patientId) {
+                    alert("Session context missing. Please try again from the patient list.");
+                    return;
+                }
+
+                // Map form to MedicalTest.java model
+                const testData = {
+                    patientId: patientId,
+                    doctorId: doctorId,
+                    testName: document.getElementById("testName").value,
+                    category: document.getElementById("category").value,
+                    price: parseFloat(document.getElementById("price").value),
+                    description: document.getElementById("description").value,
+                    resultStatus: document.getElementById("resultStatus").value,
+                    history: document.getElementById("history").value
+                };
+
+                try {
+                    // Call MedicalTestController POST endpoint
+                    const response = await fetch("/api/medical-tests", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(testData)
+                    });
+
+                    if (!response.ok) throw new Error("Submission failed");
+
+                    alert("Medical test ordered successfully! ✅");
+                    window.location.href = "/medical-tests-dashboard";
+
+                } catch (error) {
+                    console.error("Error:", error);
+                    alert("Error saving medical test record ❌");
+                }
+            });
+        });
+    </script>
+</body>
+</html>

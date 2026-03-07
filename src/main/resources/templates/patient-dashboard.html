@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Portal | HealthFlow Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        .sidebar-gradient { background: #0f172a; }
+        .glass-card { background: #ffffff; border: 1px solid #e2e8f0; transition: all 0.3s ease; cursor: pointer; }
+        .glass-card:hover { transform: translateY(-4px); border-color: #3b82f6; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .app-bg { background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px); background-size: 24px 24px; }
+    </style>
+</head>
+<body class="app-bg text-slate-900 overflow-x-hidden">
+    <input type="hidden" id="sessPatientId" th:value="${patientId}">
+
+    <aside class="sidebar-gradient fixed left-0 top-0 h-screen w-64 text-white z-50">
+        <div class="p-6 text-center border-b border-slate-700/50">
+            <h2 class="text-xl font-bold text-blue-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+        </div>
+        <nav class="mt-6 px-4 space-y-2">
+            <button onclick="switchTab('clinics')" class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
+                <i class="fas fa-hospital mr-3 text-blue-400"></i> Clinics
+            </button>
+            
+            <button onclick="switchTab('doctors')" class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
+                <i class="fas fa-user-md mr-3 text-blue-400"></i> Doctors
+            </button>
+            
+            <button onclick="switchTab('prescriptions')" class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
+                <i class="fas fa-file-prescription mr-3 text-blue-400"></i> Prescriptions
+            </button>
+
+            <button onclick="switchTab('tests')" class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
+                <i class="fas fa-microscope mr-3 text-blue-400"></i> Lab Tests
+            </button>
+        </nav>
+    </aside>
+
+    <main class="ml-64 p-10 min-h-screen">
+        <header class="flex justify-between items-center mb-10 bg-white p-6 rounded-2xl shadow-sm border border-slate-200/50">
+            <h1 class="text-2xl font-bold">Welcome, <span th:text="${patientName}">User</span></h1>
+            <button onclick="location.href='/login'" class="bg-red-50 text-red-600 px-4 py-2 rounded-lg font-bold text-xs">LOGOUT</button>
+        </header>
+
+        <div id="displayArea" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="col-span-full text-center py-20">
+                <i class="fas fa-hand-holding-medical text-4xl text-blue-200 mb-4"></i>
+                <p class="text-slate-400 font-medium">Please select a category from the sidebar to view information.</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const pId = document.getElementById('sessPatientId').value;
+
+        async function switchTab(type) {
+            // ✅ REDIRECTS: These point to your specific @GetMapping endpoints
+            
+            if(type === 'prescriptions') {
+                location.href = '/patient/my-prescriptions';
+                return;
+            }
+
+            if(type === 'clinics') {
+                location.href = '/patient/clinics';
+                return;
+            }
+
+            if(type === 'doctors') {
+                location.href = '/patient/doctors';
+                return;
+            }
+
+            // ✅ AJAX/REST: Only Lab Tests load inside the dashboard displayArea
+            if(type === 'tests') {
+                const area = document.getElementById('displayArea');
+                area.innerHTML = '<div class="col-span-full text-center py-10"><i class="fas fa-spinner animate-spin text-blue-500 text-3xl"></i></div>';
+                
+                try {
+                    const url = `/api/medical-tests/filter?patientId=${pId}`;
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                    const data = await res.json();
+                    renderGeneric(data, type);
+                    
+                } catch (err) {
+                    console.error("Fetch Error:", err);
+                    area.innerHTML = `<div class="col-span-full text-center py-10 text-red-500 font-bold">Error loading ${type}.</div>`;
+                }
+            }
+        }
+
+        function renderGeneric(data, type) {
+            const area = document.getElementById('displayArea');
+            if (!data || data.length === 0) {
+                area.innerHTML = `<p class="col-span-full text-center text-slate-500 py-10">No records found for ${type}.</p>`;
+                return;
+            }
+            area.innerHTML = data.map(item => `
+                <div class="glass-card p-6 rounded-3xl border-l-4 border-l-emerald-500 shadow-sm">
+                    <h3 class="font-bold text-slate-800">${item.testName || 'Medical Record'}</h3>
+                    <p class="text-xs text-slate-500 mt-2">Status: <span class="text-blue-600 font-bold uppercase">${item.resultStatus || 'Pending'}</span></p>
+                </div>`).join('');
+        }
+
+        // Logic to automatically open a tab if redirected with a ?tab= parameter
+        window.onload = () => {
+            const params = new URLSearchParams(window.location.search);
+            const tab = params.get('tab');
+            if (tab) switchTab(tab);
+        };
+    </script>
+</body>
+</html>

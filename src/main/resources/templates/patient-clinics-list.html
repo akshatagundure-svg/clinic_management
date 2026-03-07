@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Clinics | HealthFlow Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        .sidebar-gradient { background: #0f172a; }
+        .glass-card { background: #ffffff; border: 1px solid #e2e8f0; transition: all 0.3s ease; cursor: pointer; }
+        .glass-card:hover { transform: translateY(-5px); border-color: #3b82f6; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .app-bg { background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px); background-size: 24px 24px; }
+    </style>
+</head>
+<body class="app-bg text-slate-900 overflow-x-hidden">
+
+    <input type="hidden" id="sessPatientId" th:value="${patientId}">
+
+    <aside class="sidebar-gradient fixed left-0 top-0 h-screen w-64 text-white z-50">
+        <div class="p-6 text-center border-b border-slate-700/50">
+            <h2 class="text-xl font-bold text-blue-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+        </div>
+        <nav class="mt-6 px-4 space-y-2">
+    <button onclick="location.href='/patient/clinics'" class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
+        <i class="fas fa-hospital mr-3 text-blue-400"></i> Clinics
+    </button>
+    
+    <button onclick="location.href='/patient/doctors'" class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
+        <i class="fas fa-user-md mr-3 text-blue-400"></i> Doctors
+    </button>
+    
+    <button onclick="location.href='/patient/my-prescriptions?patientId=' + document.getElementById('sessPatientId').value" class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
+        <i class="fas fa-file-prescription mr-3 text-blue-400"></i> Prescriptions
+    </button>
+
+    <button onclick="switchTab('tests')" class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
+        <i class="fas fa-microscope mr-3 text-blue-400"></i> Lab Tests
+    </button>
+</nav>
+    </aside>
+
+    <main class="ml-64 p-10 min-h-screen">
+        <div class="max-w-6xl mx-auto">
+            <header class="flex justify-between items-center mb-10 bg-white p-6 rounded-2xl shadow-sm border border-slate-200/50">
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Healthcare Facilities</h1>
+                    <p class="text-slate-400 text-sm font-medium mt-1">Browse and book appointments at our partner clinics.</p>
+                </div>
+                <button onclick="location.href='/patient-dashboard'" class="text-slate-500 hover:text-blue-600 font-bold text-xs tracking-widest transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i> BACK TO DASHBOARD
+                </button>
+            </header>
+            
+            <div id="clinicGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="col-span-full text-center py-20 text-slate-400">
+                    <i class="fas fa-spinner animate-spin text-3xl mb-4 text-blue-500"></i>
+                    <p class="font-medium">Fetching available clinics...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const pId = document.getElementById('sessPatientId').value;
+
+        // ✅ Centralized navigation helper
+        function switchTab(type) {
+            if (type === 'doctors') location.href = '/patient-dashboard?tab=doctors';
+            else if (type === 'prescriptions') location.href = `/patient/my-prescriptions?patientId=${pId}`;
+            else if (type === 'tests') location.href = '/patient-dashboard?tab=tests';
+        }
+
+        async function loadClinics() {
+            try {
+                // Fetch all clinics from the consolidated endpoint
+                const res = await fetch('/api/clinics');
+                const clinics = await res.json();
+                
+                const grid = document.getElementById('clinicGrid');
+                
+                if (clinics.length === 0) {
+                    grid.innerHTML = `
+                        <div class="col-span-full text-center py-20 bg-white rounded-3xl border border-slate-200">
+                            <i class="fas fa-hospital-alt text-slate-200 text-5xl mb-4"></i>
+                            <p class="text-slate-500 font-medium">No clinics are currently available.</p>
+                        </div>`;
+                    return;
+                }
+
+                grid.innerHTML = clinics.map(c => `
+                    <div class="glass-card p-8 rounded-[2rem] flex flex-col h-full border border-slate-100" onclick="location.href='/patient/clinics/${c.clinicId}'">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
+                                <i class="fas fa-hospital text-xl"></i>
+                            </div>
+                            <span class="text-[10px] font-bold px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full uppercase tracking-wider">
+                                ${c.status || 'ACTIVE'}
+                            </span>
+                        </div>
+                        
+                        <h3 class="text-xl font-bold text-slate-800 line-clamp-1">${c.clinicName}</h3>
+                        <p class="text-xs text-slate-400 mt-2 font-bold uppercase tracking-widest"><i class="fas fa-tags mr-2 text-blue-400"></i>${c.clinicType || 'General'}</p>
+                        
+                        <div class="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Service Hours</p>
+                            <p class="text-xs font-bold text-slate-700">
+                                <i class="fas fa-clock mr-2 text-blue-500"></i>
+                                ${c.openingTime || '09:00 AM'} — ${c.closingTime || '08:00 PM'}
+                            </p>
+                        </div>
+                        
+                        <div class="mt-auto pt-8 flex items-center justify-between">
+                            <p class="text-[10px] text-blue-600 font-bold uppercase tracking-[0.2em]">View Details</p>
+                            <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+                                <i class="fas fa-chevron-right text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error("Error loading clinics:", err);
+                document.getElementById('clinicGrid').innerHTML = `
+                    <div class="col-span-full text-center py-20 text-red-500">
+                        <i class="fas fa-exclamation-triangle text-3xl mb-2"></i>
+                        <p class="font-bold">Failed to load clinic list. Please try again later.</p>
+                    </div>`;
+            }
+        }
+        
+        loadClinics();
+    </script>
+</body>
+</html>

@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.springcrud.model.Doctor;
 import com.example.springcrud.model.LoginRequest;
+import com.example.springcrud.model.Patient;
 import com.example.springcrud.repository.DoctorRepository;
+import com.example.springcrud.repository.PatientRepository;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -30,11 +32,19 @@ public class DoctorController {
     @Autowired
     private DoctorRepository doctorRepository;
 
+    @Autowired
+    private PatientRepository patientRepository; // ✅ Required to fix previous errors
+
     // ================= CREATE =================
     @PostMapping
     public ResponseEntity<Doctor> createDoctor(@RequestBody Doctor doctor) {
         Doctor savedDoctor = doctorRepository.save(doctor);
         return new ResponseEntity<>(savedDoctor, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/count")
+    public long getDoctorCount() {
+        return doctorRepository.count();
     }
 
     // ================= READ WITH FILTERS =================
@@ -79,59 +89,70 @@ public class DoctorController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // ================= AUTHENTICATION =================
+    // ================= AUTHENTICATION (SINGLE ENDPOINT) =================
     @PostMapping("/login")
-    public ResponseEntity<?> authDoctor(@RequestBody LoginRequest request, HttpSession session) {
-        Optional<Doctor> doctor = doctorRepository.findByPhoneAndPassword(
-                request.getPhone(),
-                request.getPassword());
+    public ResponseEntity<?> authUser(@RequestBody LoginRequest request, HttpSession session) {
+        String role = request.getRole();
 
-        if (doctor.isPresent()) {
-            // CRITICAL: Save the full object and ID for profile management
-            session.setAttribute("doctorId", doctor.get().getId());
-            session.setAttribute("doctorName", doctor.get().getName());
-            session.setAttribute("loggedInDoctor", doctor.get());
-            return new ResponseEntity<>(doctor.get(), HttpStatus.OK);
+        // 1. Check for Doctor Login
+        if ("DOCTOR".equalsIgnoreCase(role)) {
+            Optional<Doctor> doctor = doctorRepository.findByPhoneAndPassword(
+                    request.getPhone(), request.getPassword());
+            
+            if (doctor.isPresent()) {
+                session.setAttribute("doctorId", doctor.get().getDoctorId());
+                session.setAttribute("doctorName", doctor.get().getName());
+                session.setAttribute("role", "DOCTOR");
+                return new ResponseEntity<>(doctor.get(), HttpStatus.OK);
+            }
+        } 
+        // 2. Check for Patient Login
+        else if ("PATIENT".equalsIgnoreCase(role)) {
+            Optional<Patient> patient = patientRepository.findByPhoneAndPassword(
+                    request.getPhone(), request.getPassword());
+
+            if (patient.isPresent()) {
+                session.setAttribute("patientId", patient.get().getPatientId());
+                session.setAttribute("patientName", patient.get().getFullName());
+                session.setAttribute("role", "PATIENT");
+                return new ResponseEntity<>(patient.get(), HttpStatus.OK);
+            }
+        }
+
+        return new ResponseEntity<>("Invalid credentials or role", HttpStatus.UNAUTHORIZED);
+    }
+
+    // ================= UPDATE PROFILE =================
+    @PutMapping("/{doctorId}")
+    public ResponseEntity<?> updateDoctor(@PathVariable String doctorId, @RequestBody Doctor details, HttpSession session) {
+
+        Optional<Doctor> doctorOptional = doctorRepository.findById(doctorId);
+
+        if (doctorOptional.isPresent()) {
+            Doctor existing = doctorOptional.get();
+            existing.setName(details.getName());
+            existing.setSpecialization(details.getSpecialization());
+            existing.setExperience(details.getExperience());
+            existing.setQualification(details.getQualification());
+            existing.setGender(details.getGender());
+            existing.setPhone(details.getPhone());
+            existing.setEmail(details.getEmail());
+            existing.setPassword(details.getPassword());
+            existing.setConsultationFee(details.getConsultationFee());
+            existing.setAvailability(details.getAvailability());
+            existing.setHospitalName(details.getHospitalName());
+            existing.setAddress(details.getAddress());
+
+            Doctor saved = doctorRepository.save(existing);
+            session.setAttribute("doctorName", saved.getName());
+            session.setAttribute("loggedInDoctor", saved);
+
+            return new ResponseEntity<>(saved, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>("Invalid phone or password", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>("Doctor not found with ID: " + doctorId, HttpStatus.NOT_FOUND);
         }
     }
 
-    // ================= UPDATE PROFILE =================
-   // ================= UPDATE PROFILE =================
-    // ================= UPDATE PROFILE =================
-    @PutMapping("/{doctorId}")
-public ResponseEntity<?> updateDoctor(@PathVariable String doctorId, @RequestBody Doctor details, HttpSession session) {
-    Optional<Doctor> doctorOptional = doctorRepository.findById(doctorId);
-
-    if (doctorOptional.isPresent()) {
-        Doctor existing = doctorOptional.get();
-
-        // 1. Update all fields from the details object
-        existing.setName(details.getName());
-        existing.setSpecialization(details.getSpecialization());
-        existing.setExperience(details.getExperience());
-        existing.setQualification(details.getQualification());
-        existing.setGender(details.getGender());
-        existing.setEmail(details.getEmail());
-        existing.setPassword(details.getPassword());
-        existing.setConsultationFee(details.getConsultationFee());
-        existing.setAvailability(details.getAvailability());
-        existing.setHospitalName(details.getHospitalName());
-        existing.setAddress(details.getAddress());
-
-        // 2. Save to MongoDB
-        Doctor saved = doctorRepository.save(existing);
-        
-        // 3. REFRESH SESSION - This is why your page wasn't showing changes!
-        session.setAttribute("doctorName", saved.getName());
-        session.setAttribute("loggedInDoctor", saved); 
-
-        return new ResponseEntity<>(saved, HttpStatus.OK);
-    } else {
-        return new ResponseEntity<>("Doctor not found with ID: " + doctorId, HttpStatus.NOT_FOUND);
-    }
-}
     // ================= DELETE =================
     @DeleteMapping("/{doctorId}")
     public ResponseEntity<HttpStatus> deleteDoctor(@PathVariable String doctorId) {

@@ -2,6 +2,7 @@ package com.example.springcrud.controller;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +31,14 @@ public class MedicineController {
     private MedicineRepository medicineRepository;
 
     /**
-     * ✅ 1. FILTER - Specific path MUST come before /{id}
-     * Find medicines by combining criteria
-     * Example: /api/medicines/filter?company=Pfizer&name=Advil
+     * ✅ 1. FILTER 
+     * Find medicines by combining criteria: medId, name, company, or status.
      */
+
+     @GetMapping("/count")
+public long getMedicineCount() {
+    return medicineRepository.count();
+}
     @GetMapping("/filter")
     public ResponseEntity<List<Medicine>> filterMedicines(
             @RequestParam(required = false) String medId,
@@ -43,7 +48,6 @@ public class MedicineController {
         
         List<Medicine> medicines = medicineRepository.findAll();
 
-        // Single Stream pipeline for better performance
         List<Medicine> filteredMedicines = medicines.stream()
             .filter(m -> medId == null || medId.isEmpty() || 
                     (m.getMedId() != null && m.getMedId().equalsIgnoreCase(medId)))
@@ -68,7 +72,7 @@ public class MedicineController {
     }
 
     /**
-     * ✅ 3. READ BY ID - Generic dynamic path comes last
+     * ✅ 3. READ BY ID
      */
     @GetMapping("/{id}")
     public ResponseEntity<Medicine> getMedicineById(@PathVariable String id) {
@@ -78,11 +82,22 @@ public class MedicineController {
     }
 
     /**
-     * ✅ 4. CREATE
+     * ✅ 4. CREATE (Updated with Auto-generation Logic)
+     * Finalizes the record, generates a Business ID if missing, and sets default status.
      */
     @PostMapping
     public ResponseEntity<Medicine> createMedicine(@RequestBody Medicine medicine) {
         try {
+            // Auto-generate Business ID if not provided (e.g., MED-A1B2C)
+            if (medicine.getMedId() == null || medicine.getMedId().isEmpty()) {
+                medicine.setMedId("MED-" + UUID.randomUUID().toString().substring(0, 5).toUpperCase());
+            }
+            
+            // Ensure record status is set to ACTIVE by default
+            if (medicine.getRecordStatus() == null) {
+                medicine.setRecordStatus("ACTIVE");
+            }
+
             Medicine savedMedicine = medicineRepository.save(medicine);
             return new ResponseEntity<>(savedMedicine, HttpStatus.CREATED);
         } catch (Exception e) {

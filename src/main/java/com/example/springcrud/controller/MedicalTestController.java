@@ -28,14 +28,23 @@ public class MedicalTestController {
     @Autowired
     private MedicalTestRepository medicalTestRepository;
 
-    // ✅ 1. COUNT - Specific path MUST come before /{id}
+    // ✅ 1. COUNT ALL (General)
     @GetMapping("/count")
     public long getCount() {
         return medicalTestRepository.count();
     }
 
     /**
-     * ✅ 2. FILTER - Specific path MUST come before /{id}
+     * ✅ 1.1 COUNT BY DOCTOR (Specific for Dashboard Initialization)
+     * This endpoint is called by your JavaScript dashboard initialization.
+     */
+    @GetMapping("/count/{doctorId}")
+    public long getCountByDoctor(@PathVariable String doctorId) {
+        return medicalTestRepository.countByDoctorId(doctorId);
+    }
+
+    /**
+     * ✅ 2. FILTER
      * Multi-criteria filter for Medical Tests
      */
     @GetMapping("/filter")

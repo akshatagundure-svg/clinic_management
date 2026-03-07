@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicine Inventory | HealthFlow Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-gradient { background: #0f172a; }
+        .glass-card { background: #ffffff; border: 1px solid #e2e8f0; }
+        .app-bg { background-color: #f1f5f9; background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px); background-size: 24px 24px; }
+    </style>
+</head>
+<body class="app-bg text-slate-900 overflow-x-hidden">
+    <input type="hidden" id="profId" th:value="${doctorId}">
+
+   <aside class="sidebar-gradient fixed left-0 top-0 h-screen w-64 text-white shadow-2xl z-50">
+        <div class="p-6 text-center border-b border-slate-700/50">
+            <h2 class="text-xl font-bold tracking-wider text-blue-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+            <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1 font-semibold">Doctor Portal</p>
+        </div>
+        
+        <nav class="mt-6 px-4 space-y-1">
+            <a th:href="@{/doctordb}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl bg-blue-600 text-white cursor-pointer shadow-lg shadow-blue-900/20">
+                <i class="fas fa-chart-line mr-3"></i> Analytics
+            </a>
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Management</div>
+            <a th:href="@{/clinicinfo}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-hospital mr-3 text-blue-400"></i> My Clinics
+            </a>
+            <a th:href="@{/patientinfo}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-users mr-3 text-blue-400"></i> Patient List
+            </a>
+            <a th:href="@{/medical-tests-dashboard}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-flask mr-3 text-blue-400"></i> Laboratory
+            </a>
+            <a th:href="@{/inventory}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-pills mr-3 text-blue-400"></i> Pharmacy
+            </a>
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Settings</div>
+            <a th:href="@{/my-profile}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-user-circle mr-3 text-blue-400"></i> Profile
+            </a>
+        </nav>
+    </aside>
+
+    <main class="ml-64 p-8 min-h-screen">
+        <header class="flex justify-between items-center mb-10 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Medicine Inventory</h1>
+                <p class="text-slate-500 text-xs mt-1">Manage and track available pharmaceutical stock</p>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="location.reload()" class="bg-slate-50 hover:bg-slate-100 text-slate-600 p-3 rounded-xl transition-all">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="glass-card rounded-3xl overflow-hidden shadow-sm">
+            <table class="w-full text-left">
+                <thead class="bg-slate-50 border-b border-slate-100">
+                    <tr class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        <th class="px-8 py-4">Medicine Info</th>
+                        <th class="px-8 py-4">Company</th>
+                        <th class="px-8 py-4">Dosage/Route</th>
+                        <th class="px-8 py-4">Status</th>
+                        <th class="px-8 py-4 text-right">Price</th>
+                    </tr>
+                </thead>
+                <tbody id="medicineTableBody" class="divide-y divide-slate-50">
+                    <tr>
+                        <td colspan="5" class="px-8 py-10 text-center text-slate-400">
+                            <i class="fas fa-circle-notch fa-spin mr-2"></i> Fetching inventory...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", fetchMedicines);
+
+        async function fetchMedicines() {
+            try {
+                // Call your existing MedicineController GET ALL endpoint
+                const response = await fetch('/api/medicines');
+                const medicines = await response.json();
+                
+                const tableBody = document.getElementById("medicineTableBody");
+                
+                if (medicines.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="5" class="px-8 py-10 text-center text-slate-400">No medicines found in database.</td></tr>`;
+                    return;
+                }
+
+                tableBody.innerHTML = medicines.map(m => `
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-8 py-5">
+                            <div class="font-bold text-slate-800">${m.name}</div>
+                            <div class="text-[10px] font-bold text-blue-500 uppercase tracking-tight">${m.medId}</div>
+                        </td>
+                        <td class="px-8 py-5 text-sm text-slate-500">${m.companyName || 'N/A'}</td>
+                        <td class="px-8 py-5 text-sm text-slate-500">
+                            <span class="font-medium">${m.dosage || '-'}</span> 
+                            <span class="text-[10px] text-slate-300 mx-1">|</span> 
+                            <span class="italic text-xs">${m.route || '-'}</span>
+                        </td>
+                        <td class="px-8 py-5">
+                            <span class="text-[10px] font-bold px-2 py-1 rounded-lg ${m.recordStatus === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}">
+                                ${m.recordStatus || 'ACTIVE'}
+                            </span>
+                        </td>
+                        <td class="px-8 py-5 text-right font-bold text-slate-700">
+                            ₹ ${m.price ? m.price.toFixed(2) : '0.00'}
+                        </td>
+                    </tr>
+                `).join('');
+
+            } catch (err) {
+                console.error("Error:", err);
+                document.getElementById("medicineTableBody").innerHTML = `<tr><td colspan="5" class="px-8 py-10 text-center text-red-500">Failed to load inventory.</td></tr>`;
+            }
+        }
+    </script>
+</body>
+</html>

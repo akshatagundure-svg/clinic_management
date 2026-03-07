@@ -4,6 +4,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -14,10 +15,23 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class Prescription {
 
     @Id
-    private String id;
+    private String id; // Standard MongoDB internal ID
+
+    /**
+     * ✅ Business ID (e.g., PRES001). 
+     * Indexed to ensure uniqueness and resolve E11000 Duplicate Key errors.
+     */
+    @Indexed(unique = true)
+    private String prescriptionId; 
 
     private String recordStatus; 
     private boolean doctorChangeAllowed;
+
+    /**
+     * ✅ Store root-level doctor name to avoid extra nested lookups 
+     * during dashboard list rendering.
+     */
+    private String doctorName; 
 
     private PatientInfo patient; 
     private CurrentDoctor currentDoctor;
@@ -32,11 +46,11 @@ public class Prescription {
 
     public Prescription() {}
 
-    // --- Inner Classes for Nested Objects ---
+    // ================= INNER CLASSES FOR NESTED OBJECTS =================
 
     public static class PatientInfo {
-        private String patientId;
-        public PatientInfo() {} // Necessary for Jackson
+        private String patientId; // Primary key for patient-specific lookups
+        public PatientInfo() {} 
         public String getPatientId() { return patientId; }
         public void setPatientId(String patientId) { this.patientId = patientId; }
     }
@@ -220,32 +234,50 @@ public class Prescription {
         public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
     }
 
-    // --- Main Prescription Getters & Setters ---
+    // ================= MAIN GETTERS & SETTERS =================
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
+
+    public String getPrescriptionId() { return prescriptionId; }
+    public void setPrescriptionId(String prescriptionId) { this.prescriptionId = prescriptionId; }
+
     public String getRecordStatus() { return recordStatus; }
     public void setRecordStatus(String recordStatus) { this.recordStatus = recordStatus; }
+    
     public boolean isDoctorChangeAllowed() { return doctorChangeAllowed; }
     public void setDoctorChangeAllowed(boolean doctorChangeAllowed) { this.doctorChangeAllowed = doctorChangeAllowed; }
+
+    public String getDoctorName() { return doctorName; }
+    public void setDoctorName(String doctorName) { this.doctorName = doctorName; }
+
     public PatientInfo getPatient() { return patient; }
     public void setPatient(PatientInfo patient) { this.patient = patient; }
+    
     public CurrentDoctor getCurrentDoctor() { return currentDoctor; }
     public void setCurrentDoctor(CurrentDoctor currentDoctor) { this.currentDoctor = currentDoctor; }
+    
     public Diagnosis getDiagnosis() { return diagnosis; }
     public void setDiagnosis(Diagnosis diagnosis) { this.diagnosis = diagnosis; }
+    
     public TreatmentTimeline getTreatmentTimeline() { return treatmentTimeline; }
     public void setTreatmentTimeline(TreatmentTimeline treatmentTimeline) { this.treatmentTimeline = treatmentTimeline; }
+    
     public List<MedicationItem> getMedications() { return medications; }
     public void setMedications(List<MedicationItem> medications) { this.medications = medications; }
+    
     public List<ProcedureItem> getProcedures() { return procedures; }
     public void setProcedures(List<ProcedureItem> procedures) { this.procedures = procedures; }
+    
     public List<InvestigationItem> getInvestigations() { return investigations; }
     public void setInvestigations(List<InvestigationItem> investigations) { this.investigations = investigations; }
+    
     public List<PreviousDoctorRecord> getPreviousDoctors() { return previousDoctors; }
     public void setPreviousDoctors(List<PreviousDoctorRecord> previousDoctors) { this.previousDoctors = previousDoctors; }
+    
     public FollowUp getFollowUp() { return followUp; }
     public void setFollowUp(FollowUp followUp) { this.followUp = followUp; }
+    
     public AuditInfo getAudit() { return audit; }
     public void setAudit(AuditInfo audit) { this.audit = audit; }
 }

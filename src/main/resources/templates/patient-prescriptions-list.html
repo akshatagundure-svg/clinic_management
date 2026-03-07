@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Prescriptions | HealthFlow Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        .sidebar-gradient { background: #0f172a; }
+        .prescription-card { background: white; border-radius: 1.5rem; transition: all 0.3s ease; border: 1px solid #e2e8f0; }
+        .prescription-card:hover { transform: translateY(-4px); border-color: #3b82f6; box-shadow: 0 10px 20px -5px rgba(0,0,0,0.05); }
+        .app-bg { background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px); background-size: 24px 24px; }
+    </style>
+</head>
+<body class="app-bg text-slate-900 overflow-x-hidden">
+
+    <input type="hidden" id="sessPatientId" th:value="${patientId}">
+
+    <aside class="sidebar-gradient fixed left-0 top-0 h-screen w-64 text-white z-50">
+        <div class="p-6 text-center border-b border-slate-700/50">
+            <h2 class="text-xl font-bold text-blue-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+        </div>
+        <nav class="mt-6 px-4 space-y-2">
+            <button onclick="location.href='/patient/clinics'" class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
+                <i class="fas fa-hospital mr-3 text-blue-400"></i> Clinics
+            </button>
+            <button onclick="location.href='/patient/doctors'" class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
+                <i class="fas fa-user-md mr-3 text-blue-400"></i> Doctors
+            </button>
+            <button onclick="location.href='/patient/my-prescriptions'" class="w-full flex items-center px-4 py-3 text-sm rounded-xl bg-blue-600/20 text-blue-400">
+                <i class="fas fa-file-prescription mr-3 text-blue-400"></i> Prescriptions
+            </button>
+            <button onclick="location.href='/patient-dashboard?tab=tests'" class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
+                <i class="fas fa-microscope mr-3 text-blue-400"></i> Lab Tests
+            </button>
+        </nav>
+    </aside>
+
+    <main class="ml-64 p-8 md:p-12 min-h-screen">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex items-center justify-between mb-10 bg-white p-6 rounded-2xl shadow-sm border border-slate-200/50">
+                <div>
+                    <button onclick="location.href='/patient-dashboard'" class="text-slate-400 hover:text-blue-600 mb-2 flex items-center text-sm font-medium transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i> Back to Portal
+                    </button>
+                    <h1 class="text-3xl font-bold text-slate-900">Medical Prescriptions</h1>
+                </div>
+                <div class="bg-blue-600 text-white px-5 py-2 rounded-2xl text-sm font-bold shadow-lg shadow-blue-200">
+                    <i class="fas fa-file-medical mr-2"></i> My Records
+                </div>
+            </div>
+
+            <div id="prescriptionContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="col-span-full text-center py-20">
+                    <i class="fas fa-spinner animate-spin text-4xl text-blue-500"></i>
+                    <p class="mt-4 text-slate-500 font-medium">Loading your medical history...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script th:inline="javascript">
+        // ✅ FIX: Priority to Session ID from hidden input
+        const pIdFromSession = document.getElementById('sessPatientId').value;
+        const urlParams = new URLSearchParams(window.location.search);
+        const pIdFromUrl = urlParams.get('patientId');
+        
+        // Use session ID if available, otherwise fallback to URL
+        const patientId = pIdFromSession || pIdFromUrl;
+
+        async function fetchPrescriptions() {
+            const container = document.getElementById('prescriptionContainer');
+            
+            if (!patientId) {
+                container.innerHTML = `<div class="col-span-full text-center py-10 text-amber-600 font-bold">Session expired. Please log in again.</div>`;
+                return;
+            }
+
+            try {
+                // Fetch prescriptions for the specific patient using absolute path
+                const res = await fetch(`/api/prescriptions/patient/${patientId}`);
+                if (!res.ok) throw new Error('Network response was not ok');
+                const data = await res.json();
+
+                if(data.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-span-full text-center py-20 bg-white rounded-3xl border border-slate-200">
+                            <i class="fas fa-folder-open text-slate-200 text-5xl mb-4"></i>
+                            <p class="text-slate-500 font-medium">No prescriptions found for your history.</p>
+                        </div>`;
+                    return;
+                }
+
+                container.innerHTML = data.map(p => {
+                    const docName = p.currentDoctor ? p.currentDoctor.fullName : (p.doctorName || "Specialist");
+                    const diagnosis = p.diagnosis ? (p.diagnosis.confirmedDiagnosis || p.diagnosis.provisionalDiagnosis) : "General Consultation";
+                    
+                    const date = p.audit ? new Date(p.audit.createdAt).toLocaleDateString('en-IN', { 
+                        day: '2-digit', month: 'short', year: 'numeric' 
+                    }) : "Recent";
+
+                    return `
+                        <div class="prescription-card p-6 flex flex-col h-full border-l-4 border-l-blue-500 shadow-sm">
+                            <div class="flex justify-between items-start mb-4">
+                                <span class="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-1 rounded-md tracking-widest uppercase">${date}</span>
+                                <span class="text-[10px] font-bold px-2 py-1 rounded uppercase ${p.recordStatus === 'FINAL' ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'}">
+                                    ${p.recordStatus || 'Active'}
+                                </span>
+                            </div>
+                            
+                            <h3 class="text-lg font-bold text-slate-800 mb-1 leading-tight">${diagnosis}</h3>
+                            <p class="text-sm text-slate-500 mb-4 flex items-center">
+                                <i class="fas fa-user-md text-blue-400 mr-2"></i> 
+                                <span class="font-semibold text-slate-700">Dr. ${docName}</span>
+                            </p>
+
+                            <div class="mt-auto pt-4 border-t border-slate-50 flex justify-between items-center">
+                                <span class="text-[10px] font-mono text-slate-300 font-bold">${p.prescriptionId || 'ID-PENDING'}</span>
+                                <button onclick="location.href='/patient/prescription-details?id=${p.prescriptionId}&patientId=${patientId}'" 
+                                        class="text-blue-600 font-bold text-xs hover:text-blue-800 transition-colors">
+                                    VIEW DETAILS <i class="fas fa-chevron-right ml-1 text-[10px]"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error("Fetch Error:", err);
+                container.innerHTML = `<div class="col-span-full text-center py-20 text-red-500 font-bold">Error connecting to server.</div>`;
+            }
+        }
+
+        fetchPrescriptions();
+    </script>
+</body>
+</html>

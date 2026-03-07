@@ -5,25 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doctor Dashboard | HealthFlow Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .sidebar-gradient { background: #0f172a; }
-        .glass-card { background: #ffffff; border: 1px solid #e2e8f0; }
-        .card-hover:hover { 
-            transform: translateY(-5px); 
-            transition: all 0.3s ease; 
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.8); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
         }
         .app-bg {
-            background-color: #f1f5f9;
+            background-color: #f8fafc;
             background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px);
             background-size: 24px 24px;
+        }
+        .stat-value { letter-spacing: -1px; }
+        .action-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            background: #ffffff;
         }
     </style>
 </head>
 <body class="app-bg text-slate-900 overflow-x-hidden">
+
+    <input type="hidden" id="profId" th:value="${doctorId}">
 
     <aside class="sidebar-gradient fixed left-0 top-0 h-screen w-64 text-white shadow-2xl z-50">
         <div class="p-6 text-center border-b border-slate-700/50">
@@ -32,137 +40,166 @@
         </div>
         
         <nav class="mt-6 px-4 space-y-1">
-            <a th:href="@{/doctordb}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl bg-blue-600 text-white cursor-pointer transition-all shadow-lg shadow-blue-900/20">
+            <a th:href="@{/doctordb}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl bg-blue-600 text-white cursor-pointer shadow-lg shadow-blue-900/20">
                 <i class="fas fa-home mr-3"></i> Dashboard
             </a>
-            
-            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Clinical Tools</div>
-            <a th:href="@{/add-patient}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-all group">
-                <i class="fas fa-user-plus mr-3 text-blue-400 group-hover:scale-110"></i> Add Patient
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Management</div>
+            <a th:href="@{/clinicinfo}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-hospital mr-3 text-blue-400"></i> My Clinics
             </a>
-            <a th:href="@{/patientinfo}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-all group">
-                <i class="fas fa-users mr-3 text-blue-400 group-hover:scale-110"></i> Patient List
+            <a th:href="@{/patientinfo}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-users mr-3 text-blue-400"></i> Patient List
             </a>
-            <a th:href="@{/prescription-list}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-all group">
-                <i class="fas fa-file-prescription mr-3 text-blue-400 group-hover:scale-110"></i> Prescriptions
+            <a th:href="@{/medical-tests-dashboard}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-flask mr-3 text-blue-400"></i> Laboratory
             </a>
-
-            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Account Settings</div>
-            <a th:href="@{/my-profile}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-all group">
-                <i class="fas fa-user-circle mr-3 text-blue-400 group-hover:scale-110"></i> My Profile
+            <a th:href="@{/inventory}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-pills mr-3 text-blue-400"></i> Pharmacy
             </a>
-            <a th:href="@{/clinic-register}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-all group">
-                <i class="fas fa-clinic-medical mr-3 text-blue-400 group-hover:scale-110"></i> Register Clinic
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Settings</div>
+            <a th:href="@{/my-profile}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-user-circle mr-3 text-blue-400"></i> Profile
             </a>
         </nav>
     </aside>
 
-    <main class="ml-64 p-8 min-h-screen">
-        <header class="flex justify-between items-center mb-10 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+    <main class="ml-64 p-10 min-h-screen">
+        <header class="flex justify-between items-end mb-12">
             <div>
-                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Doctor Dashboard</h1>
-                <p class="text-slate-500 text-xs mt-1">Welcome back, <span class="font-bold text-blue-600" th:text="${doctorName}">Doctor</span></p>
+                <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">Practice Overview</h1>
+                <p class="text-slate-500 text-sm mt-1">Real-time modular metrics for <span class="text-blue-600 font-bold" th:text="${doctorName}">Doctor</span></p>
             </div>
             <div class="flex items-center space-x-4">
-                <button onclick="handleLogout()" class="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-xl font-bold text-xs transition-all uppercase tracking-wider">
-                    Logout
+                <form th:action="@{/api/doctors/logout}" method="POST" id="logoutForm" class="hidden"></form>
+                <button onclick="handleLogout()" class="bg-white border border-slate-200 text-slate-600 px-5 py-2.5 rounded-2xl font-bold text-xs shadow-sm hover:bg-red-50 hover:text-red-500 transition-all">
+                    LOGOUT
                 </button>
-                <div class="h-10 w-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg shadow-blue-200">
-                    <span th:text="${#strings.substring(doctorName,0,1)}">D</span>
-                </div>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div class="glass-card card-hover p-6 rounded-2xl border-t-4 border-t-blue-500">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+            <div class="glass-card p-8 rounded-[2rem] border-t-4 border-t-blue-500">
                 <div class="flex justify-between items-start mb-4">
-                    <div class="bg-blue-50 p-3 rounded-xl text-blue-600"><i class="fas fa-users text-xl"></i></div>
-                    <span class="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded-lg">Total</span>
+                    <div class="bg-blue-50 p-3 rounded-2xl text-blue-600"><i class="fas fa-user-injured text-xl"></i></div>
+                    <span class="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded-lg uppercase tracking-wider">Patients</span>
                 </div>
-                <h3 class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">My Patients</h3>
-                <div class="text-3xl font-bold text-slate-800 my-1" id="patientCount">--</div>
+                <h3 class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Total Records</h3>
+                <div class="text-4xl font-extrabold text-slate-800 stat-value" id="pText">0</div>
             </div>
 
-            <div class="glass-card card-hover p-6 rounded-2xl border-t-4 border-t-emerald-500">
+            <div class="glass-card p-8 rounded-[2rem] border-t-4 border-t-amber-500">
                 <div class="flex justify-between items-start mb-4">
-                    <div class="bg-emerald-50 p-3 rounded-xl text-emerald-600"><i class="fas fa-hospital-user text-xl"></i></div>
-                    <span class="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-lg">Locations</span>
+                    <div class="bg-amber-50 p-3 rounded-2xl text-amber-600"><i class="fas fa-microscope text-xl"></i></div>
+                    <span class="text-[10px] font-bold text-amber-500 bg-amber-50 px-2 py-1 rounded-lg uppercase tracking-wider">Labs</span>
                 </div>
-                <h3 class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Clinics Linked</h3>
-                <div class="text-3xl font-bold text-slate-800 my-1" id="clinicCount">0</div>
+                <h3 class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Investigations</h3>
+                <div class="text-4xl font-extrabold text-slate-800 stat-value" id="tText">0</div>
             </div>
 
-            <div class="glass-card card-hover p-6 rounded-2xl border-t-4 border-t-purple-500">
+            <div class="glass-card p-8 rounded-[2rem] border-t-4 border-t-emerald-500">
                 <div class="flex justify-between items-start mb-4">
-                    <div class="bg-purple-50 p-3 rounded-xl text-purple-600"><i class="fas fa-stethoscope text-xl"></i></div>
-                    <span class="text-[10px] font-bold text-purple-500 bg-purple-50 px-2 py-1 rounded-lg">Staff</span>
+                    <div class="bg-emerald-50 p-3 rounded-2xl text-emerald-600"><i class="fas fa-hospital text-xl"></i></div>
+                    <span class="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-lg uppercase tracking-wider">Clinics</span>
                 </div>
-                <h3 class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Active Doctors</h3>
-                <div class="text-3xl font-bold text-slate-800 my-1" id="doctorCount">--</div>
+                <h3 class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Active Locations</h3>
+                <div class="text-4xl font-extrabold text-slate-800 stat-value" id="cText">0</div>
+            </div>
+
+            <div class="glass-card p-8 rounded-[2rem] border-t-4 border-t-rose-500">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="bg-rose-50 p-3 rounded-2xl text-rose-600"><i class="fas fa-pills text-xl"></i></div>
+                    <span class="text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-1 rounded-lg uppercase tracking-wider">Inventory</span>
+                </div>
+                <h3 class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Medicines</h3>
+                <div class="text-4xl font-extrabold text-slate-800 stat-value" id="mText">0</div>
             </div>
         </div>
 
-        <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center">
-            <i class="fas fa-bolt text-amber-500 mr-2"></i> Quick Actions
+        <h3 class="text-lg font-bold text-slate-800 mb-8 flex items-center">
+            <i class="fas fa-bolt text-amber-500 mr-2"></i> Quick Operations
         </h3>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div th:onclick="|window.location.href='/my-profile'|" class="glass-card card-hover p-6 rounded-2xl cursor-pointer group">
-                <div class="bg-indigo-50 w-12 h-12 rounded-xl flex items-center justify-center text-indigo-600 mb-4 group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                    <i class="fas fa-user-circle text-xl"></i>
-                </div>
-                <h4 class="font-bold text-slate-800">My Profile</h4>
-                <p class="text-xs text-slate-500 mt-2">View and update your personal professional details.</p>
-            </div>
-
-            <div th:onclick="|window.location.href='/add-patient'|" class="glass-card card-hover p-6 rounded-2xl cursor-pointer group">
-                <div class="bg-emerald-50 w-12 h-12 rounded-xl flex items-center justify-center text-emerald-600 mb-4 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div onclick="location.href='/add-patient'" class="glass-card p-8 rounded-[2rem] cursor-pointer action-card transition-all group">
+                <div class="bg-blue-50 w-14 h-14 rounded-2xl flex items-center justify-center text-blue-600 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                     <i class="fas fa-user-plus text-xl"></i>
                 </div>
-                <h4 class="font-bold text-slate-800">New Consultation</h4>
-                <p class="text-xs text-slate-500 mt-2">Register a new patient and start a session.</p>
+                <h4 class="font-extrabold text-slate-800">New Patient</h4>
+                <p class="text-xs text-slate-400 mt-2">Add a new patient record</p>
+            </div>
+            
+            <div onclick="location.href='/medical-tests-dashboard'" class="glass-card p-8 rounded-[2rem] cursor-pointer action-card transition-all group">
+                <div class="bg-amber-50 w-14 h-14 rounded-2xl flex items-center justify-center text-amber-600 mb-6 group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                    <i class="fas fa-flask text-xl"></i>
+                </div>
+                <h4 class="font-extrabold text-slate-800">Lab Order</h4>
+                <p class="text-xs text-slate-400 mt-2">Request investigations</p>
             </div>
 
-            <div th:onclick="|window.location.href='/clinic-register'|" class="glass-card card-hover p-6 rounded-2xl cursor-pointer group">
-                <div class="bg-orange-50 w-12 h-12 rounded-xl flex items-center justify-center text-orange-600 mb-4 group-hover:bg-orange-600 group-hover:text-white transition-all">
-                    <i class="fas fa-map-marker-alt text-xl"></i>
+            <div onclick="location.href='/inventory'" class="glass-card p-8 rounded-[2rem] cursor-pointer action-card transition-all group">
+                <div class="bg-rose-50 w-14 h-14 rounded-2xl flex items-center justify-center text-rose-600 mb-6 group-hover:bg-rose-600 group-hover:text-white transition-colors">
+                    <i class="fas fa-capsules text-xl"></i>
                 </div>
-                <h4 class="font-bold text-slate-800">Assign Clinic</h4>
-                <p class="text-xs text-slate-500 mt-2">Connect your account to a new practice facility.</p>
+                <h4 class="font-extrabold text-slate-800">Pharmacy</h4>
+                <p class="text-xs text-slate-400 mt-2">Manage medicine stock</p>
+            </div>
+
+            <div onclick="location.href='/clinicinfo'" class="glass-card p-8 rounded-[2rem] cursor-pointer action-card transition-all group">
+                <div class="bg-emerald-50 w-14 h-14 rounded-2xl flex items-center justify-center text-emerald-600 mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                    <i class="fas fa-hospital-alt text-xl"></i>
+                </div>
+                <h4 class="font-extrabold text-slate-800">My Clinics</h4>
+                <p class="text-xs text-slate-400 mt-2">View practice details</p>
             </div>
         </div>
     </main>
 
     <script>
-        async function fetchStats() {
+        // ✅ Handle Logout logic
+        async function handleLogout() {
+            if(!confirm("Are you sure you want to logout?")) return;
             try {
-                // Fetch using your existing API list endpoint
-                const response = await fetch('/api/doctors');
-                if (response.ok) {
-                    const doctors = await response.json();
-                    document.getElementById('doctorCount').innerText = doctors.length;
-                }
-                
-                // Fetch patients list to get count
-                const pResponse = await fetch('/api/patients');
-                if (pResponse.ok) {
-                    const patients = await pResponse.json();
-                    document.getElementById('patientCount').innerText = patients.length;
-                }
-            } catch (err) {
-                console.error("Failed to load dashboard stats", err);
+                await fetch('/api/doctors/logout', { method: 'POST' });
+                window.location.href = "/login";
+            } catch (error) {
+                console.error("Logout error:", error);
+                window.location.href = "/login";
             }
         }
 
-        function handleLogout() {
-            // Clearing browser storage
-            localStorage.clear();
-            // Optional: You can create a /logout endpoint in Java to clear the Session too
-            window.location.href = '/login';
-        }
+        // ✅ Initialization Process: Fetch counts from Backend
+        document.addEventListener("DOMContentLoaded", async function() {
+            const doctorId = document.getElementById('profId')?.value;
+            console.log("Initializing Dashboard for Doctor ID:", doctorId);
 
-        window.onload = fetchStats;
+            if (!doctorId) {
+                console.error("Dashboard error: No Doctor ID found.");
+                return;
+            }
+
+            try {
+                // Fetching all data in parallel
+                const [patients, clinics, testCountRaw, medicines] = await Promise.all([
+                    fetch(`/api/patients/doctor/${doctorId}`).then(r => r.json()),
+                    fetch(`/api/clinics/my-clinics/${doctorId}`).then(r => r.json()),
+                    fetch('/api/medical-tests/count').then(r => r.text()),
+                    fetch('/api/medicines').then(r => r.json())
+                ]);
+
+                // ✅ DOM Initialization: Injecting the numbers
+                document.getElementById('pText').innerText = patients.length || 0;
+                document.getElementById('cText').innerText = clinics.length || 0;
+                document.getElementById('tText').innerText = parseInt(testCountRaw) || 0;
+                document.getElementById('mText').innerText = medicines.length || 0;
+
+            } catch (err) {
+                console.error("Failed to load metrics:", err);
+                // Fallback to zero on error
+                ['pText', 'tText', 'cText', 'mText'].forEach(id => {
+                    document.getElementById(id).innerText = "0";
+                });
+            }
+        });
     </script>
-    <script src="/js/app.js"></script>
 </body>
 </html>

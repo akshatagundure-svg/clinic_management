@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Report | HealthFlow Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-gradient { background: #0f172a; }
+        .report-border { border-top: 8px solid #3b82f6; }
+        .app-bg {
+            background-color: #f1f5f9;
+            background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+        }
+        /* Style for the PDF generation container to ensure high quality */
+        #reportContent { background: white; }
+        
+        @media print {
+            .no-print { display: none !important; }
+            .ml-64 { margin-left: 0 !important; }
+            body { background: white; padding: 0; }
+        }
+    </style>
+</head>
+<body class="app-bg text-slate-900 overflow-x-hidden p-4 md:p-12">
+
+    <input type="hidden" id="rxId" th:value="${prescriptionId}">
+
+    <aside class="sidebar-gradient fixed left-0 top-0 h-screen w-64 text-white shadow-2xl z-50">
+        <div class="p-6 text-center border-b border-slate-700/50">
+            <h2 class="text-xl font-bold tracking-wider text-blue-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+            <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1 font-semibold">Doctor Portal</p>
+        </div>
+        
+        <nav class="mt-6 px-4 space-y-1">
+            <a th:href="@{/doctordb}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl bg-blue-600 text-white cursor-pointer shadow-lg shadow-blue-900/20">
+                <i class="fas fa-chart-line mr-3"></i> Analytics
+            </a>
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Management</div>
+            <a th:href="@{/clinicinfo}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-hospital mr-3 text-blue-400"></i> My Clinics
+            </a>
+            <a th:href="@{/patientinfo}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-users mr-3 text-blue-400"></i> Patient List
+            </a>
+            <a th:href="@{/medical-tests-dashboard}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-flask mr-3 text-blue-400"></i> Laboratory
+            </a>
+            <a th:href="@{/inventory}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-pills mr-3 text-blue-400"></i> Pharmacy
+            </a>
+            <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-4 tracking-[2px]">Settings</div>
+            <a th:href="@{/my-profile}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 transition-all group">
+                <i class="fas fa-user-circle mr-3 text-blue-400"></i> Profile
+            </a>
+        </nav>
+    </aside>
+
+    <main class="ml-64">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex justify-between items-center mb-8 no-print">
+                <button onclick="history.back()" class="text-slate-500 font-bold text-xs uppercase hover:text-blue-600">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to History
+                </button>
+                <div class="flex gap-3">
+                    <button onclick="window.print()" class="bg-white border border-slate-200 text-slate-600 px-6 py-2 rounded-xl font-bold text-xs hover:bg-slate-50">
+                        <i class="fas fa-print mr-2"></i> PRINT
+                    </button>
+                    <button onclick="downloadPDF()" class="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold text-xs shadow-lg hover:bg-blue-700 transition-all">
+                        <i class="fas fa-file-pdf mr-2"></i> DOWNLOAD PDF
+                    </button>
+                </div>
+            </div>
+
+            <div id="reportContent" class="bg-white rounded-3xl shadow-xl overflow-hidden report-border border border-slate-200">
+                <div class="p-20 text-center text-slate-400" id="loader">
+                    <i class="fas fa-circle-notch fa-spin text-3xl mb-4 text-blue-500"></i>
+                    <p class="font-medium">Generating Full Clinical Report...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // PDF Download Function
+        async function downloadPDF() {
+            const element = document.getElementById('reportContent');
+            const rxId = document.getElementById('rxId').value;
+            
+            const opt = {
+                margin:       0.2,
+                filename:     `Prescription_${rxId}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+
+            try {
+                await html2pdf().set(opt).from(element).save();
+            } catch (error) {
+                console.error("PDF Generation Error:", error);
+                alert("Could not generate PDF. Using standard Print instead.");
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const rxId = document.getElementById('rxId').value;
+            const container = document.getElementById('reportContent');
+
+            try {
+                // Fetching single prescription by ID
+                const response = await fetch(`/api/prescriptions/${rxId}`);
+                if (!response.ok) throw new Error("Report not found");
+                const p = await response.json();
+
+                const createdAt = p.audit?.createdAt ? new Date(p.audit.createdAt).toLocaleDateString('en-GB', {
+                    day: '2-digit', month: 'long', year: 'numeric'
+                }) : 'N/A';
+
+                container.innerHTML = `
+                    <div class="p-10 border-b border-slate-100 flex justify-between items-start bg-slate-50/50">
+                        <div>
+                            <h2 class="text-2xl font-black text-slate-800 tracking-tighter">HEALTHFLOW <span class="text-blue-600">PRO</span></h2>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Medical Prescription Record</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-bold text-slate-800">Date: ${createdAt}</p>
+                            <p class="text-[10px] font-bold text-blue-500 uppercase mt-1">Ref ID: ${p.id}</p>
+                        </div>
+                    </div>
+
+                    <div class="p-10 space-y-10">
+                        <div class="grid grid-cols-2 gap-10">
+                            <div>
+                                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Patient Details</h4>
+                                <p class="text-lg font-bold text-slate-800">ID: ${p.patient?.patientId || 'N/A'}</p>
+                            </div>
+                            <div class="text-right">
+                                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Issued By</h4>
+                                <p class="text-lg font-bold text-slate-800">Dr. ${p.currentDoctor?.fullName || 'Doctor'}</p>
+                                <p class="text-xs text-slate-500">${p.currentDoctor?.specialization || 'General Practitioner'}</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-blue-50/50 p-6 rounded-2xl border border-blue-100">
+                            <h4 class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-3">Primary Diagnosis</h4>
+                            <p class="text-xl font-bold text-slate-800">${p.diagnosis?.confirmedDiagnosis || 'N/A'}</p>
+                            <div class="flex gap-6 mt-4">
+                                <span class="text-xs text-slate-500"><b>Severity:</b> ${p.diagnosis?.severity || 'Standard'}</span>
+                                <span class="text-xs text-slate-500"><b>ICD Code:</b> ${p.diagnosis?.icdCode || 'N/A'}</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 border-b pb-2">Medication Schedule</h4>
+                            <table class="w-full text-left">
+                                <thead class="text-[10px] text-slate-400 uppercase font-bold">
+                                    <tr>
+                                        <th class="py-2">Medicine</th>
+                                        <th class="py-2">Dosage</th>
+                                        <th class="py-2">Route</th>
+                                        <th class="py-2">Frequency</th>
+                                        <th class="py-2">Instructions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-sm">
+                                    ${p.medications?.map(m => `
+                                        <tr class="border-b border-slate-50">
+                                            <td class="py-4 font-bold text-slate-800">${m.medicineName}</td>
+                                            <td class="py-4 text-slate-600">${m.dosage}</td>
+                                            <td class="py-4 text-slate-600">${m.route || 'Oral'}</td>
+                                            <td class="py-4 text-slate-600">${m.frequency}</td>
+                                            <td class="py-4 text-slate-600 italic">${m.instructions || '-'}</td>
+                                        </tr>
+                                    `).join('') || '<tr><td colspan="5">No medications listed</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        ${p.followUp?.followUpRequired ? `
+                        <div class="bg-slate-900 text-white p-6 rounded-2xl flex justify-between items-center">
+                            <div>
+                                <h4 class="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1">Follow-up Required</h4>
+                                <p class="text-sm opacity-80">${p.followUp.notes || 'Routine checkup advised.'}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-lg font-black">${new Date(p.followUp.followUpDate).toLocaleDateString('en-GB')}</p>
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="p-10 bg-slate-50 text-[10px] text-slate-400 text-center font-bold uppercase tracking-widest">
+                        End of Clinical Report
+                    </div>
+                `;
+            } catch (err) {
+                container.innerHTML = `<div class="p-10 text-red-500 font-bold text-center">Error: ${err.message}</div>`;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -17,6 +17,10 @@ public interface PatientRepository extends MongoRepository<Patient, String> {
     // =====================================================
 
     Optional<Patient> findByPatientId(String patientId);
+    Optional<Patient> findByPhoneAndPassword(String phone, String password);
+    List<Patient> findByDoctorId(String doctorId);
+    long countByDoctorId(String doctorId);
+
 
     Optional<Patient> findByEmailAddress(String emailAddress);
 

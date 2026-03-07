@@ -3,6 +3,9 @@ package com.example.springcrud.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.springcrud.model.Doctor;
 
@@ -87,14 +90,29 @@ public String showClinicListPage() {
         model.addAttribute("doctorName", doctorName);
         return "index"; // renders index.html
     }
-    @GetMapping("/add-patient")
-    public String showAddPatient() {
-        return "add-patient"; 
+   @GetMapping("/add-patient")
+public String showAddPatient(HttpSession session, Model model) {
+
+    Doctor doctor = (Doctor) session.getAttribute("loggedInDoctor");
+
+    if (doctor == null) {
+        return "redirect:/login";
     }
+
+    model.addAttribute("doctorId", doctor.getDoctorId());
+    model.addAttribute("doctorName", doctor.getName());
+
+    return "add-patient";
+}
+// Inside WebController.java
 @GetMapping("/patientinfo")
-    public String showPatientInfo() {
-        return "patientinfo"; // Points to patientinfo.html
-    }
+public String showPatientInfo(HttpSession session, Model model) {
+    Doctor doctor = (Doctor) session.getAttribute("loggedInDoctor");
+    if (doctor == null) return "redirect:/login";
+
+    model.addAttribute("doctorId", doctor.getDoctorId());
+    return "patientinfo";
+}
     @GetMapping("/add-doctor")
 public String showAddDoctor() {
     return "add-doctor"; // Serves src/main/resources/templates/add-doctor.html
@@ -109,18 +127,190 @@ public String showDoctorInfo() {
     }
 @GetMapping("/my-profile")
 public String showMyProfile(HttpSession session, Model model) {
-    // Retrieve the doctor object saved during login
-    Doctor doctor = (Doctor) session.getAttribute("loggedInDoctor");
+    String doctorId = (String) session.getAttribute("doctorId");
+    if (doctorId == null) {
+        return "redirect:/login"; 
+    }
+    model.addAttribute("doctorId", doctorId);
+    model.addAttribute("doctorName", session.getAttribute("doctorName"));
+    return "my-profile"; // Points to my-profile.html
+}
 
-    if (doctor == null) {
-        return "redirect:/login";
+@GetMapping("/add-clinic")
+public String showAddClinicPage(HttpSession session, Model model) {
+    String doctorId = (String) session.getAttribute("doctorId");
+    if (doctorId == null) {
+        return "redirect:/login"; // Redirect to login if session is missing
+    }
+    model.addAttribute("doctorId", doctorId);
+    model.addAttribute("doctorName", session.getAttribute("doctorName"));
+    return "add-clinic";
+}
+@GetMapping("/clinicinfo")
+    public String showClinicInfoPage(HttpSession session, Model model) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        
+        // Safety check: if doctor is not logged in, send them to login
+        if (doctorId == null) {
+            return "redirect:/login"; 
+        }
+
+        model.addAttribute("doctorId", doctorId);
+        model.addAttribute("doctorName", session.getAttribute("doctorName"));
+        return "clinicinfo"; // Must match clinicinfo.html
+    }
+// Renamed the mapping to match the filename 'add-prescription'
+// Inside WebController.java
+// WebController.java
+ @GetMapping("/add-prescription")
+public String showPrescriptionPage(@RequestParam String patientId, Model model, HttpSession session) {
+    // Note: If you have different session keys, adjust them here
+    model.addAttribute("doctorId", session.getAttribute("doctorId"));
+    model.addAttribute("doctorName", session.getAttribute("doctorName"));
+    model.addAttribute("patientId", patientId);
+    return "add-prescription"; 
+}
+@GetMapping("/patient-prescriptions")
+public String getPatientHistory(@RequestParam String patientId, 
+                                @RequestParam String doctorId, 
+                                Model model) {
+    // These must be added to the model so the HTML can use them
+    model.addAttribute("patientId", patientId);
+    model.addAttribute("doctorId", doctorId);
+    return "patient-prescriptions"; 
+}
+
+@GetMapping("/view-prescription/{id}")
+public String viewSinglePrescription(@PathVariable String id, Model model) {
+    model.addAttribute("prescriptionId", id);
+    return "view-prescription"; 
+}
+
+@GetMapping("/clinic-details")
+public String showClinicDetailsPage(@RequestParam String id, HttpSession session, Model model) {
+    String doctorId = (String) session.getAttribute("doctorId");
+    if (doctorId == null) {
+        return "redirect:/login"; 
+    }
+    // We pass the clinic ID from the URL to the page
+    model.addAttribute("targetClinicId", id);
+    model.addAttribute("doctorId", doctorId);
+    model.addAttribute("doctorName", session.getAttribute("doctorName"));
+    return "clinic-details";
+}
+
+@GetMapping("/medical-tests-dashboard")
+    public String showMedicalTestPatientList(HttpSession session, Model model) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        if (doctorId == null) return "redirect:/login";
+        
+        model.addAttribute("doctorId", doctorId);
+        return "medical-test-patients"; // The new HTML we will create
     }
 
-    // Pass the full doctor object (which contains the ID) to Thymeleaf
-    model.addAttribute("doctor", doctor);
-    model.addAttribute("doctorName", doctor.getName());
-    return "my-profile"; 
+@GetMapping("/add-medical-test")
+    public String showAddTestForm(@RequestParam String patientId, HttpSession session, Model model) {
+        String doctorId = (String) session.getAttribute("doctorId");
+        if (doctorId == null) return "redirect:/login";
+
+        model.addAttribute("doctorId", doctorId);
+        model.addAttribute("targetPatientId", patientId);
+        return "add-medical-test"; 
+    }
+
+@GetMapping("/view-patient-tests")
+public String showPatientTests(@RequestParam String patientId, HttpSession session, Model model) {
+    String doctorId = (String) session.getAttribute("doctorId");
+    if (doctorId == null) return "redirect:/login";
+
+    model.addAttribute("doctorId", doctorId);
+    model.addAttribute("targetPatientId", patientId);
+    return "view-patient-tests"; // Points to the new HTML
 }
+
+@GetMapping("/inventory")
+public String showInventoryPage(HttpSession session, Model model) {
+    String doctorId = (String) session.getAttribute("doctorId");
+    if (doctorId == null) {
+        return "redirect:/login";
+    }
+    model.addAttribute("doctorId", doctorId);
+    model.addAttribute("doctorName", session.getAttribute("doctorName"));
+    return "inventory"; // This will point to inventory.html
+}
+@PostMapping("/api/doctors/logout")
+public String logoutAndRedirect(HttpSession session) {
+    session.invalidate(); //
+    return "redirect:/login"; // Spring handles the redirect automatically
+}
+@GetMapping("/patient/dashboard")
+public String showPatientDashboard(HttpSession session, Model model) {
+    String patientId = (String) session.getAttribute("patientId");
     
+    // Safety Check: If session is empty, send them back to login
+    if (patientId == null) {
+        return "redirect:/patient-login"; 
+    }
+    
+    // Inject session data into the HTML
+    model.addAttribute("patientId", patientId);
+    model.addAttribute("patientName", session.getAttribute("patientName"));
+    
+    return "patient-dashboard"; // This must match your HTML filename
+}
+
+@GetMapping("/patient/clinics")
+public String listClinicsPage(HttpSession session, Model model) {
+    if (session.getAttribute("patientId") == null) return "redirect:/login";
+    return "patient-clinics-list";
+}
+
+@GetMapping("/patient/clinics/{clinicId}")
+public String clinicDetailsPage(@PathVariable String clinicId, HttpSession session, Model model) {
+    if (session.getAttribute("patientId") == null) return "redirect:/login";
+    model.addAttribute("clinicId", clinicId);
+    return "patient-clinic-details";
+}
+
+@GetMapping("/patient/doctors")
+public String listDoctorsPage(HttpSession session) {
+    if (session.getAttribute("patientId") == null) return "redirect:/login";
+    return "patient-doctors-list";
+}
+
+@GetMapping("/patient/doctor-details/{id}")
+public String doctorDetailsPage(@PathVariable String id, HttpSession session, Model model) {
+    if (session.getAttribute("patientId") == null) return "redirect:/login";
+    model.addAttribute("doctorId", id);
+    return "patient-doctor-details";
+}
+@GetMapping("/patient/my-prescriptions")
+public String myPrescriptionsPage(HttpSession session, Model model) {
+    String pId = (String) session.getAttribute("patientId");
+    if (pId == null) return "redirect:/login"; 
+    
+    // ✅ Critical: This makes th:value="${patientId}" work in HTML
+    model.addAttribute("patientId", pId);
+    model.addAttribute("patientName", session.getAttribute("patientName"));
+    return "patient-prescriptions-list"; 
+}
+
+@GetMapping("/patient/prescription-details")
+    public String prescriptionDetailsPage(@RequestParam String id, 
+                                          @RequestParam String patientId, 
+                                          HttpSession session, 
+                                          Model model) {
+        // Security check: Ensure user is logged in
+        if (session.getAttribute("patientId") == null) {
+            return "redirect:/login";
+        }
+
+        // Pass parameters to the view so the JavaScript can use them for API calls
+        model.addAttribute("prescriptionId", id);
+        model.addAttribute("patientId", patientId);
+        
+        return "prescription-details"; // Must match prescription-details.html in /templates/
+    }
+
 
 }

@@ -90,48 +90,62 @@
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const errorDiv = document.getElementById('error-msg');
-            const errorText = document.getElementById('error-text');
-            errorDiv.classList.add('hidden');
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const errorDiv = document.getElementById('error-msg');
+        const errorText = document.getElementById('error-text');
+        errorDiv.classList.add('hidden');
 
-            const payload = {
-                phone: document.getElementById('phone').value.trim(),
-                password: document.getElementById('password').value,
-                role: document.getElementById('role').value 
-            };
+        // Capture input values
+        const phoneInput = document.getElementById('phone').value.trim();
+        const passwordInput = document.getElementById('password').value;
+        const roleInput = document.getElementById('role').value;
 
-            try {
-                // Calls your existing endpoint in DoctorController
-                const response = await fetch('/api/doctors/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+        // ✅ EXTRA FEATURE: Hardcoded Admin Access
+        // This checks for specific admin credentials before calling the server
+        if (roleInput === 'admin' && phoneInput === '9999999999' && passwordInput === 'admin123') {
+            window.location.href = '/dashboard';
+            return; // Exit the function so it doesn't try to call the API
+        }
 
-                if (response.ok) {
-                    const user = await response.json();
-                    
-                    if (payload.role === 'doctor') {
-                        // Redirects to your existing route
-                        window.location.href = '/doctordb';
-                    } else {
-                        // Redirects to your other dashboard routes
-                        window.location.href = `/${payload.role}/dashboard`;
-                    }
+        // EXISTING FEATURE: Prepare payload for Doctor/Patient API login
+        const payload = {
+            phone: phoneInput,
+            password: passwordInput,
+            role: roleInput 
+        };
+
+        try {
+            // Existing API call for doctors and patients
+            const response = await fetch('/api/doctors/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                const user = await response.json();
+                
+                // Keep your existing redirection logic
+                if (payload.role === 'doctor') {
+                    window.location.href = '/doctordb';
                 } else {
-                    // Handles the 401 Unauthorized or other errors
-                    const message = await response.text();
-                    errorText.innerText = message || "Invalid phone or password.";
-                    errorDiv.classList.remove('hidden');
+                    // Redirect for other roles returned by the API
+                    window.location.href = `/${payload.role}/dashboard`;
                 }
-            } catch (err) {
-                errorText.innerText = "Connection failed. Please check if the server is running.";
+            } else {
+                // Handles API errors (Invalid credentials for Doctor/Patient)
+                const message = await response.text();
+                errorText.innerText = message || "Invalid phone or password.";
                 errorDiv.classList.remove('hidden');
             }
-        });
-    </script>
+        } catch (err) {
+            // Network or Server errors
+            errorText.innerText = "Connection failed. Please check if the server is running.";
+            errorDiv.classList.remove('hidden');
+        }
+    });
+</script>
 </body>
 </html>

@@ -28,7 +28,14 @@ public class PrescriptionController {
     @Autowired
     private PrescriptionRepository prescriptionRepository;
 
-    // ✅ 1. SEARCH/FILTER (Specific path MUST come before /{id})
+    // =====================================================
+    // 📊 SEARCH & FILTERING
+    // =====================================================
+
+    /**
+     * ✅ 1. SEARCH/FILTER
+     * Allows filtering by patientId, diagnosis keyword, or record status.
+     */
     @GetMapping("/search")
     public ResponseEntity<List<Prescription>> searchPrescriptions(
             @RequestParam(required = false) String patientId,
@@ -41,7 +48,8 @@ public class PrescriptionController {
             .filter(p -> patientId == null || patientId.isEmpty() || 
                     (p.getPatient() != null && p.getPatient().getPatientId().equalsIgnoreCase(patientId)))
             .filter(p -> diagnosis == null || diagnosis.isEmpty() || 
-                    (p.getDiagnosis() != null && p.getDiagnosis().getConfirmedDiagnosis().toLowerCase().contains(diagnosis.toLowerCase())))
+                    (p.getDiagnosis() != null && p.getDiagnosis().getConfirmedDiagnosis() != null &&
+                     p.getDiagnosis().getConfirmedDiagnosis().toLowerCase().contains(diagnosis.toLowerCase())))
             .filter(p -> status == null || status.isEmpty() || 
                     (p.getRecordStatus() != null && p.getRecordStatus().equalsIgnoreCase(status)))
             .collect(Collectors.toList());
@@ -49,13 +57,49 @@ public class PrescriptionController {
         return new ResponseEntity<>(filtered, HttpStatus.OK);
     }
 
-    // ✅ 2. READ ALL
+    // =====================================================
+    // 📂 FETCH BY RELATIONS (Linking Doctor & Patient)
+    // =====================================================
+
+    /**
+     * ✅ 2. FETCH BY DOCTOR 
+     * Retrieves all prescriptions issued by a specific doctor.
+     */
+    @GetMapping("/doctor/{doctorId}")
+    public ResponseEntity<List<Prescription>> getByDoctor(@PathVariable String doctorId) {
+        // Matches Repository method findByCurrentDoctor_DoctorId for nested objects
+        return ResponseEntity.ok(prescriptionRepository.findByCurrentDoctor_DoctorId(doctorId));
+    }
+
+    /**
+     * ✅ 3. FETCH BY PATIENT
+     * Retrieves the clinical history for a specific patient.
+     */
+    // ✅ KEEP THIS ONE (Around Line 78)
+@GetMapping("/patient/{patientId}")
+public ResponseEntity<List<Prescription>> getByPatient(@PathVariable String patientId) {
+    // Ensure findByPatient_PatientId is defined in your Repository
+    return ResponseEntity.ok(prescriptionRepository.findByPatient_PatientId(patientId));
+}
+
+// ❌ DELETE THE OTHER ONE (Around Line 115)
+// Remove the method 'getPatientPrescriptions' entirely!
+
+    // =====================================================
+    // 📝 STANDARD CRUD OPERATIONS
+    // =====================================================
+
+    /**
+     * ✅ 4. READ ALL
+     */
     @GetMapping
     public ResponseEntity<List<Prescription>> getAllPrescriptions() {
         return new ResponseEntity<>(prescriptionRepository.findAll(), HttpStatus.OK);
     }
 
-    // ✅ 3. READ BY ID (Dynamic path)
+    /**
+     * ✅ 5. READ BY ID
+     */
     @GetMapping("/{id}")
     public ResponseEntity<Prescription> getPrescriptionById(@PathVariable String id) {
         return prescriptionRepository.findById(id)
@@ -63,17 +107,29 @@ public class PrescriptionController {
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // ✅ 4. CREATE
-    @PostMapping
-    public ResponseEntity<Prescription> createPrescription(@RequestBody Prescription prescription) {
-        try {
-            return new ResponseEntity<>(prescriptionRepository.save(prescription), HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+    /**
+     * ✅ 6. CREATE
+     * Finalizes the record and assigns a unique RX ID if not provided.
+     */
+   @PostMapping
+public ResponseEntity<?> createPrescription(@RequestBody Prescription prescription) {
+    try {
+        String uniqueRxId = "RX-" + java.util.UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        
+        prescription.setId(uniqueRxId);
+        prescription.setPrescriptionId(uniqueRxId); // ✅ Populates the indexed field
 
-    // ✅ 5. UPDATE
+        Prescription saved = prescriptionRepository.save(prescription);
+        return new ResponseEntity<>(saved, HttpStatus.CREATED);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                             .body("Backend Error: " + e.getMessage());
+    }
+}
+    /**
+     * ✅ 7. UPDATE
+     */
     @PutMapping("/{id}")
     public ResponseEntity<Prescription> updatePrescription(@PathVariable String id, @RequestBody Prescription newData) {
         return prescriptionRepository.findById(id).map(p -> {
@@ -82,11 +138,16 @@ public class PrescriptionController {
             p.setDiagnosis(newData.getDiagnosis());
             p.setMedications(newData.getMedications());
             p.setRecordStatus(newData.getRecordStatus());
+            p.setTreatmentTimeline(newData.getTreatmentTimeline());
+            p.setAudit(newData.getAudit());
+            
             return new ResponseEntity<>(prescriptionRepository.save(p), HttpStatus.OK);
         }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // ✅ 6. DELETE
+    /**
+     * ✅ 8. DELETE
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> deletePrescription(@PathVariable String id) {
         if (prescriptionRepository.existsById(id)) {

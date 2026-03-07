@@ -17,6 +17,7 @@ public class Patient {
 
     @Id
     private String id; 
+    private String doctorId;
 
     private String patientId; 
     private String fullName;
@@ -45,6 +46,7 @@ public class Patient {
 
     private Double height;
     private Double weight;
+ 
 
     public Patient() {}
 
@@ -60,6 +62,9 @@ public class Patient {
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
+
+    public String getDoctorId() { return doctorId; }
+    public void setDoctorId(String doctorId) { this.doctorId = doctorId; }
 
     public String getPatientId() { return patientId; }
     public void setPatientId(String patientId) { this.patientId = patientId; }
