@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Akshata AI | Clinical Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* THEME: Modern Clinical - Navy & Azure */
+        .sidebar-gradient { background: #0f172a; }
+        .glass-card { background: #ffffff; border: 1px solid #e2e8f0; }
+        .card-hover:hover { 
+            transform: translateY(-5px); 
+            transition: all 0.3s ease; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Custom background for the whole app */
+        .app-bg {
+            background-color: #f1f5f9;
+            background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+        }
+
+        /* Chat Specific Customizations */
+        .chat-area::-webkit-scrollbar { width: 6px; }
+        .chat-area::-webkit-scrollbar-track { background: transparent; }
+        .chat-area::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        /* Animations */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes msgIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30%            { transform: translateY(-6px); opacity: 1; }
+        }
+        .animate-msg { animation: msgIn 0.3s ease forwards; }
+        .animate-fade-up { animation: fadeUp 0.5s ease forwards; }
+        
+        .typing-dot {
+            animation: typingBounce 1.4s infinite;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        /* Formatting markdown in chat */
+        .markdown-body pre { background: #1e293b; color: #f8fafc; padding: 12px; border-radius: 8px; overflow-x: auto; margin-top: 8px; margin-bottom: 8px; font-size: 0.875rem; }
+        .markdown-body code { background: #e2e8f0; color: #0f172a; padding: 2px 6px; border-radius: 4px; font-size: 0.875rem; }
+        .markdown-body pre code { background: transparent; padding: 0; color: inherit; }
+    </style>
+</head>
+<body class="app-bg text-slate-900 overflow-hidden flex h-screen">
+
+    <aside class="sidebar-gradient w-64 text-white shadow-2xl flex flex-col flex-shrink-0 z-20 transition-all duration-300">
+        <div class="p-6 text-center border-b border-slate-700/50">
+            <h2 class="text-xl font-bold tracking-wider text-blue-400 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                AKSHATA <span class="text-white">AI</span>
+            </h2>
+            <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1 font-semibold">Clinical Assistant</p>
+        </div>
+
+        <div class="p-4">
+            <button onclick="newChat()" class="w-full flex items-center justify-center px-4 py-3 text-sm font-medium rounded-xl bg-blue-600 text-white cursor-pointer transition-all hover:bg-blue-500 shadow-lg shadow-blue-900/20 group">
+                <i class="fas fa-plus mr-2 group-hover:rotate-90 transition-transform"></i> New Consultation
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto px-4 py-2 space-y-1">
+            <div class="pt-2 pb-2 text-[10px] font-bold text-slate-500 uppercase px-2 tracking-[2px]">Recent Sessions</div>
+            
+            <div class="flex items-center px-4 py-3 text-sm font-medium rounded-xl bg-slate-800 text-blue-400 cursor-pointer transition-all border border-slate-700">
+                <i class="fas fa-message mr-3"></i> <span id="currentChat" class="truncate">Current Session</span>
+            </div>
+            <div class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-history mr-3 text-slate-500 group-hover:text-blue-400 transition-colors"></i> <span class="truncate">Patient history summary</span>
+            </div>
+            <div class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer transition-all group">
+                <i class="fas fa-history mr-3 text-slate-500 group-hover:text-blue-400 transition-colors"></i> <span class="truncate">Drug interaction check</span>
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-slate-700/50">
+            <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-800 transition-colors cursor-pointer" onclick="window.location.href='/patient/dashboard'">
+                <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold border border-slate-600">
+                    <i class="fas fa-arrow-left text-slate-300"></i>
+                </div>
+                <div class="flex-1 overflow-hidden">
+                    <div class="text-sm font-medium truncate text-white">Back to Dashboard</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col min-w-0 relative">
+        
+        <header class="h-16 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 shadow-sm z-10">
+            <div class="flex items-center gap-2 text-sm font-semibold text-slate-700 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-200 transition-colors">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                DeepSeek Med-Model
+                <i class="fas fa-chevron-down text-xs ml-1 text-slate-400"></i>
+            </div>
+            <div class="flex items-center gap-3">
+                <button class="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-blue-600 transition-colors">
+                    <i class="fas fa-print"></i>
+                </button>
+                <button class="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-blue-600 transition-colors">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 chat-area" id="chatArea">
+            
+            <div class="flex flex-col items-center justify-center min-h-[70vh] text-center max-w-3xl mx-auto animate-fade-up" id="welcomeScreen">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 border border-blue-200 text-blue-600 flex items-center justify-center text-3xl mb-6 shadow-inner">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-slate-800 tracking-tight mb-2">Hello, I am Your AI Assistant</h1>
+                <p class="text-slate-500 text-sm mb-10 max-w-md">Your clinical AI assistant is ready. Ask about patient data, medical protocols, or HMS integrations.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                    <div class="glass-card card-hover p-5 rounded-2xl text-left cursor-pointer border-t-4 border-t-blue-500" onclick="sendSuggestion('Summarize the latest lab report for Patient ID #1042')">
+                        <div class="text-blue-500 mb-2"><i class="fas fa-microscope text-xl"></i></div>
+                        <h3 class="text-sm font-bold text-slate-800 mb-1">Lab Reports</h3>
+                        <p class="text-xs text-slate-500">Summarize the latest lab report for Patient #1042</p>
+                    </div>
+                    <div class="glass-card card-hover p-5 rounded-2xl text-left cursor-pointer border-t-4 border-t-emerald-500" onclick="sendSuggestion('Check drug interactions between Lisinopril and Ibuprofen')">
+                        <div class="text-emerald-500 mb-2"><i class="fas fa-pills text-xl"></i></div>
+                        <h3 class="text-sm font-bold text-slate-800 mb-1">Pharmacy Check</h3>
+                        <p class="text-xs text-slate-500">Check interactions: Lisinopril & Ibuprofen</p>
+                    </div>
+                    <div class="glass-card card-hover p-5 rounded-2xl text-left cursor-pointer border-t-4 border-t-indigo-500" onclick="sendSuggestion('Show me today\'s appointment availability schedule')">
+                        <div class="text-indigo-500 mb-2"><i class="fas fa-clock text-xl"></i></div>
+                        <h3 class="text-sm font-bold text-slate-800 mb-1">Scheduling</h3>
+                        <p class="text-xs text-slate-500">Show today's appointment availability</p>
+                    </div>
+                    <div class="glass-card card-hover p-5 rounded-2xl text-left cursor-pointer border-t-4 border-t-rose-500" onclick="sendSuggestion('Generate a sample SQL query to retrieve all active clinics')">
+                        <div class="text-rose-500 mb-2"><i class="fas fa-database text-xl"></i></div>
+                        <h3 class="text-sm font-bold text-slate-800 mb-1">System Data</h3>
+                        <p class="text-xs text-slate-500">Query to retrieve all active clinics</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="max-w-4xl mx-auto flex flex-col gap-6 pb-6" id="messagesContainer">
+                </div>
+
+            <div class="max-w-4xl mx-auto hidden items-start gap-4 mb-6" id="typingIndicator">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center flex-shrink-0 shadow-md">
+                    <i class="fa-solid fa-robot text-sm"></i>
+                </div>
+                <div class="bg-white border border-slate-200 px-5 py-4 rounded-2xl rounded-tl-none shadow-sm flex gap-1.5 items-center h-[52px]">
+                    <div class="w-2 h-2 rounded-full bg-slate-400 typing-dot"></div>
+                    <div class="w-2 h-2 rounded-full bg-slate-400 typing-dot"></div>
+                    <div class="w-2 h-2 rounded-full bg-slate-400 typing-dot"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="bg-white/90 backdrop-blur-md border-t border-slate-200 p-4 z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+            <div class="max-w-4xl mx-auto relative">
+                <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                    <i class="fas fa-comment-medical text-slate-400"></i>
+                </div>
+                <textarea
+                    id="messageInput"
+                    class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-2xl pl-12 pr-16 py-4 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all resize-none shadow-inner"
+                    placeholder="Ask Akshata AI anything about the hospital system..."
+                    rows="1"
+                    onkeydown="handleKey(event)"
+                    oninput="autoResize(this)"
+                ></textarea>
+                <div class="absolute right-2 bottom-2 flex items-center">
+                    <button class="w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md" id="sendBtn" onclick="sendMessage()" title="Send Message">
+                        <i class="fas fa-paper-plane text-sm"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="text-center text-[10px] text-slate-400 mt-2 font-medium uppercase tracking-wider">
+                Akshata AI Module • Responses may require clinical verification
+            </div>
+        </div>
+    </main>
+
+    <div id="toast" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-red-50 text-red-600 border border-red-200 px-6 py-3 rounded-xl shadow-lg flex items-center gap-3 text-sm font-medium transition-all duration-300 opacity-0 pointer-events-none z-50">
+        <i class="fas fa-exclamation-circle text-red-500"></i>
+        <span id="toastMsg">Connection error</span>
+    </div>
+
+    <script>
+        // Use your original API URL
+        const API_URL = 'http://localhost:8080/akshata-ai/chat';
+        let messageCount = 0;
+
+        const chatArea        = document.getElementById('chatArea');
+        const messagesContainer = document.getElementById('messagesContainer');
+        const welcomeScreen   = document.getElementById('welcomeScreen');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const messageInput    = document.getElementById('messageInput');
+        const sendBtn         = document.getElementById('sendBtn');
+        const toast           = document.getElementById('toast');
+        const toastMsg        = document.getElementById('toastMsg');
+
+        function autoResize(el) {
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 150) + 'px';
+        }
+
+        function handleKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function getTime() {
+            return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function showToast(msg) {
+            toastMsg.textContent = msg;
+            toast.classList.remove('opacity-0', 'translate-y-4');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-4');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+            }, 3500);
+        }
+
+        function addMessage(text, role) {
+            if (welcomeScreen.style.display !== 'none') {
+                welcomeScreen.style.display = 'none';
+            }
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'w-full animate-msg';
+
+            const isUser = role === 'user';
+            
+            // Generate User or AI HTML based on role
+            if (isUser) {
+                wrapper.innerHTML = `
+                    <div class="flex flex-row-reverse items-start gap-4">
+                        <div class="w-10 h-10 rounded-full bg-slate-800 text-white flex items-center justify-center flex-shrink-0 shadow-md font-bold text-sm">
+                            Dr
+                        </div>
+                        <div class="flex flex-col items-end max-w-[75%]">
+                            <div class="bg-blue-600 text-white px-5 py-3.5 rounded-2xl rounded-tr-sm shadow-md text-sm leading-relaxed whitespace-pre-wrap">
+                                ${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+                            </div>
+                            <span class="text-[11px] text-slate-400 mt-1.5">${getTime()}</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                wrapper.innerHTML = `
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center flex-shrink-0 shadow-md">
+                            <i class="fa-solid fa-robot text-sm"></i>
+                        </div>
+                        <div class="flex flex-col items-start max-w-[80%]">
+                            <div class="glass-card text-slate-800 px-5 py-4 rounded-2xl rounded-tl-sm shadow-sm text-sm leading-relaxed markdown-body">
+                                ${formatText(text)}
+                            </div>
+                            <div class="flex items-center gap-3 mt-1.5">
+                                <span class="text-[11px] text-slate-400">${getTime()}</span>
+                                <div class="flex gap-1">
+                                    <button class="text-slate-400 hover:text-blue-600 transition-colors p-1 rounded" title="Copy" onclick="copyText(this, \`${text.replace(/`/g,'\\`')}\`)">
+                                        <i class="far fa-copy text-xs"></i>
+                                    </button>
+                                    <button class="text-slate-400 hover:text-emerald-500 transition-colors p-1 rounded" title="Helpful">
+                                        <i class="far fa-thumbs-up text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            messagesContainer.appendChild(wrapper);
+            scrollToBottom();
+            messageCount++;
+            
+            const currentChatLabel = document.getElementById('currentChat');
+            if(messageCount === 1 && isUser) {
+                currentChatLabel.textContent = text.slice(0, 25) + (text.length > 25 ? '…' : '');
+            }
+        }
+
+        // Basic formatting for AI response (Bold, Code Blocks, Line Breaks)
+        function formatText(text) {
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                // Code blocks
+                .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+                // Inline code
+                .replace(/`([^`]+)`/g, '<code>$1</code>')
+                // Bold text
+                .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-slate-900">$1</strong>')
+                // Line breaks
+                .replace(/\n/g, '<br>');
+        }
+
+        function copyText(btn, text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const icon = btn.querySelector('i');
+                icon.className = 'fas fa-check text-emerald-500 text-xs';
+                setTimeout(() => {
+                    icon.className = 'far fa-copy text-xs';
+                }, 2000);
+            });
+        }
+
+        function scrollToBottom() {
+            chatArea.scrollTo({ top: chatArea.scrollHeight, behavior: 'smooth' });
+        }
+
+        function showTyping() {
+            typingIndicator.classList.remove('hidden');
+            typingIndicator.classList.add('flex');
+            scrollToBottom();
+        }
+
+        function hideTyping() {
+            typingIndicator.classList.add('hidden');
+            typingIndicator.classList.remove('flex');
+        }
+
+        async function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text) return;
+
+            // Reset input
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            sendBtn.disabled = true;
+
+            addMessage(text, 'user');
+            showTyping();
+
+            try {
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+
+                if (!res.ok) throw new Error(`Server error: ${res.status}`);
+
+                const data = await res.json();
+                hideTyping();
+                addMessage(data.reply || 'No response received.', 'ai');
+
+            } catch (err) {
+                hideTyping();
+                if (err.message.includes('Failed to fetch')) {
+                    addMessage('⚠️ Connection failed. Ensure the Spring Boot backend is running on **localhost:8080**.', 'ai');
+                } else {
+                    addMessage(`⚠️ System Error: ${err.message}`, 'ai');
+                }
+                showToast('Failed to connect to AI Service');
+            }
+
+            sendBtn.disabled = false;
+            messageInput.focus();
+        }
+
+        function sendSuggestion(text) {
+            messageInput.value = text;
+            sendMessage();
+        }
+
+        function newChat() {
+            messagesContainer.innerHTML = '';
+            welcomeScreen.style.display = 'flex';
+            messageCount = 0;
+            messageInput.value = '';
+            messageInput.focus();
+            document.getElementById('currentChat').textContent = 'Current Session';
+        }
+
+        // Focus input on load
+        window.onload = () => messageInput.focus();
+    </script>
+</body>
+</html>

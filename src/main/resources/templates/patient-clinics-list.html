@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,33 +14,50 @@
         .glass-card { background: #ffffff; border: 1px solid #e2e8f0; transition: all 0.3s ease; cursor: pointer; }
         .glass-card:hover { transform: translateY(-5px); border-color: #3b82f6; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
         .app-bg { background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px); background-size: 24px 24px; }
+        .nav-active { background-color: #1e293b; color: #60a5fa; }
     </style>
 </head>
+
 <body class="app-bg text-slate-900 overflow-x-hidden">
 
-    <input type="hidden" id="sessPatientId" th:value="${patientId}">
+    <!--
+        ✅ FIX: Read patientId FROM SESSION using th:value="${session.patientId}"
+        This works because PatientController stores:
+            session.setAttribute("patientId", patient.get().getPatientId());
+        No controller change needed — Thymeleaf reads session directly.
+    -->
+    <input type="hidden" id="sessPatientId" th:value="${session.patientId}">
 
     <aside class="sidebar-gradient fixed left-0 top-0 h-screen w-64 text-white z-50">
         <div class="p-6 text-center border-b border-slate-700/50">
             <h2 class="text-xl font-bold text-blue-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
         </div>
         <nav class="mt-6 px-4 space-y-2">
-    <button onclick="location.href='/patient/clinics'" class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
-        <i class="fas fa-hospital mr-3 text-blue-400"></i> Clinics
-    </button>
-    
-    <button onclick="location.href='/patient/doctors'" class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
-        <i class="fas fa-user-md mr-3 text-blue-400"></i> Doctors
-    </button>
-    
-    <button onclick="location.href='/patient/my-prescriptions?patientId=' + document.getElementById('sessPatientId').value" class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
-        <i class="fas fa-file-prescription mr-3 text-blue-400"></i> Prescriptions
-    </button>
 
-    <button onclick="switchTab('tests')" class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
-        <i class="fas fa-microscope mr-3 text-blue-400"></i> Lab Tests
-    </button>
-</nav>
+            <!-- Clinics — active page -->
+            <button onclick="location.href='/patient/clinics'"
+                class="nav-active w-full flex items-center px-4 py-3 text-sm rounded-xl transition-all text-left">
+                <i class="fas fa-hospital mr-3 text-blue-400 w-5"></i> Clinics
+            </button>
+
+            <button onclick="location.href='/patient/doctors'"
+                class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all text-left">
+                <i class="fas fa-user-md mr-3 text-blue-400 w-5"></i> Doctors
+            </button>
+
+            <!-- ✅ FIX: Pass patientId correctly from session into the URL -->
+            <button onclick="location.href='/patient/my-prescriptions?patientId=' + document.getElementById('sessPatientId').value"
+                class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all text-left">
+                <i class="fas fa-file-prescription mr-3 text-blue-400 w-5"></i> Prescriptions
+            </button>
+
+            <!-- ✅ FIX: Pass patientId correctly from session into the URL -->
+            <button onclick="location.href='/patient/my-lab-tests?patientId=' + document.getElementById('sessPatientId').value"
+                class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all text-left">
+                <i class="fas fa-microscope mr-3 text-blue-400 w-5"></i> Lab Tests
+            </button>
+
+        </nav>
     </aside>
 
     <main class="ml-64 p-10 min-h-screen">
@@ -49,11 +67,12 @@
                     <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Healthcare Facilities</h1>
                     <p class="text-slate-400 text-sm font-medium mt-1">Browse and book appointments at our partner clinics.</p>
                 </div>
-                <button onclick="location.href='/patient-dashboard'" class="text-slate-500 hover:text-blue-600 font-bold text-xs tracking-widest transition-colors">
+                <button onclick="location.href='/patient-dashboard'"
+                    class="text-slate-500 hover:text-blue-600 font-bold text-xs tracking-widest transition-colors">
                     <i class="fas fa-arrow-left mr-2"></i> BACK TO DASHBOARD
                 </button>
             </header>
-            
+
             <div id="clinicGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div class="col-span-full text-center py-20 text-slate-400">
                     <i class="fas fa-spinner animate-spin text-3xl mb-4 text-blue-500"></i>
@@ -64,23 +83,15 @@
     </main>
 
     <script>
+        // ✅ FIX: pId now correctly reads session.patientId rendered by Thymeleaf
         const pId = document.getElementById('sessPatientId').value;
-
-        // ✅ Centralized navigation helper
-        function switchTab(type) {
-            if (type === 'doctors') location.href = '/patient-dashboard?tab=doctors';
-            else if (type === 'prescriptions') location.href = `/patient/my-prescriptions?patientId=${pId}`;
-            else if (type === 'tests') location.href = '/patient-dashboard?tab=tests';
-        }
 
         async function loadClinics() {
             try {
-                // Fetch all clinics from the consolidated endpoint
                 const res = await fetch('/api/clinics');
                 const clinics = await res.json();
-                
                 const grid = document.getElementById('clinicGrid');
-                
+
                 if (clinics.length === 0) {
                     grid.innerHTML = `
                         <div class="col-span-full text-center py-20 bg-white rounded-3xl border border-slate-200">
@@ -91,7 +102,9 @@
                 }
 
                 grid.innerHTML = clinics.map(c => `
-                    <div class="glass-card p-8 rounded-[2rem] flex flex-col h-full border border-slate-100" onclick="location.href='/patient/clinics/${c.clinicId}'">
+                    <div class="glass-card p-8 rounded-[2rem] flex flex-col h-full border border-slate-100"
+                         onclick="location.href='/patient/clinics/${c.clinicId}'">
+
                         <div class="flex justify-between items-start mb-6">
                             <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
                                 <i class="fas fa-hospital text-xl"></i>
@@ -100,10 +113,12 @@
                                 ${c.status || 'ACTIVE'}
                             </span>
                         </div>
-                        
+
                         <h3 class="text-xl font-bold text-slate-800 line-clamp-1">${c.clinicName}</h3>
-                        <p class="text-xs text-slate-400 mt-2 font-bold uppercase tracking-widest"><i class="fas fa-tags mr-2 text-blue-400"></i>${c.clinicType || 'General'}</p>
-                        
+                        <p class="text-xs text-slate-400 mt-2 font-bold uppercase tracking-widest">
+                            <i class="fas fa-tags mr-2 text-blue-400"></i>${c.clinicType || 'General'}
+                        </p>
+
                         <div class="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Service Hours</p>
                             <p class="text-xs font-bold text-slate-700">
@@ -111,7 +126,7 @@
                                 ${c.openingTime || '09:00 AM'} — ${c.closingTime || '08:00 PM'}
                             </p>
                         </div>
-                        
+
                         <div class="mt-auto pt-8 flex items-center justify-between">
                             <p class="text-[10px] text-blue-600 font-bold uppercase tracking-[0.2em]">View Details</p>
                             <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
@@ -120,6 +135,7 @@
                         </div>
                     </div>
                 `).join('');
+
             } catch (err) {
                 console.error("Error loading clinics:", err);
                 document.getElementById('clinicGrid').innerHTML = `
@@ -129,8 +145,15 @@
                     </div>`;
             }
         }
-        
+
         loadClinics();
     </script>
+    <a href="/ai" target="_blank" class="fixed bottom-8 right-8 w-16 h-16 rounded-full bg-gradient-to-r from-blue-400 to-emerald-400 text-white flex items-center justify-center shadow-xl shadow-blue-500/30 hover:shadow-emerald-500/40 hover:scale-110 transition-all duration-300 z-50 group cursor-pointer border-2 border-white">
+        <i class="fa-solid fa-wand-magic-sparkles text-2xl group-hover:rotate-12 transition-transform"></i>
+        <span class="absolute top-0 right-0 flex h-4 w-4">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-4 w-4 bg-emerald-300 border-2 border-white"></span>
+        </span>
+        </a>
 </body>
 </html>

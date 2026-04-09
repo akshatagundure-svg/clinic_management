@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,13 +9,35 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
-        .sidebar-gradient { background: #0f172a; }
-        .glass-card { background: #ffffff; border: 1px solid #e2e8f0; transition: all 0.3s ease; cursor: pointer; }
-        .glass-card:hover { transform: translateY(-4px); border-color: #3b82f6; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        .app-bg { background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px); background-size: 24px 24px; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+
+        .sidebar-gradient {
+            background: #0f172a;
+        }
+
+        .glass-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            border-color: #3b82f6;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .app-bg {
+            background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+        }
     </style>
 </head>
+
 <body class="app-bg text-slate-900 overflow-x-hidden">
     <input type="hidden" id="sessPatientId" th:value="${session.patientId}">
 
@@ -23,31 +46,37 @@
             <h2 class="text-xl font-bold text-blue-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
         </div>
         <nav class="mt-6 px-4 space-y-2">
-            <button onclick="location.href='/patient/clinics'" class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
+            <button onclick="location.href='/patient/clinics'"
+                class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
                 <i class="fas fa-hospital mr-3 text-blue-400"></i> Clinics
             </button>
-            
-            <button onclick="location.href='/patient/doctors'" class="w-full flex items-center px-4 py-3 text-sm rounded-xl bg-blue-600/20 text-blue-400 transition-all">
+
+            <button onclick="location.href='/patient/doctors'"
+                class="w-full flex items-center px-4 py-3 text-sm rounded-xl bg-blue-600/20 text-blue-400 transition-all">
                 <i class="fas fa-user-md mr-3 text-blue-400"></i> Doctors
             </button>
-            
-            <button onclick="switchTab('prescriptions')" class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
+
+            <button onclick="switchTab('prescriptions')"
+                class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
                 <i class="fas fa-file-prescription mr-3 text-blue-400"></i> Prescriptions
             </button>
 
-            <button onclick="switchTab('tests')" class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
+            <button onclick="location.href='/patient/my-lab-tests?patientId=' + document.getElementById('sessPatientId').value"
+                class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all">
                 <i class="fas fa-microscope mr-3 text-blue-400"></i> Lab Tests
             </button>
         </nav>
     </aside>
 
     <main class="ml-64 p-10 min-h-screen">
-        <header class="flex justify-between items-center mb-10 bg-white p-6 rounded-2xl shadow-sm border border-slate-200/50">
+        <header
+            class="flex justify-between items-center mb-10 bg-white p-6 rounded-2xl shadow-sm border border-slate-200/50">
             <div>
                 <h1 class="text-3xl font-bold text-slate-800">Find Specialists</h1>
                 <p class="text-slate-400 text-sm mt-1">Browse our network of qualified medical professionals.</p>
             </div>
-            <button onclick="location.href='/patient-dashboard'" class="text-slate-500 hover:text-blue-600 font-bold text-xs tracking-widest transition-colors">
+            <button onclick="location.href='/patient-dashboard'"
+                class="text-slate-500 hover:text-blue-600 font-bold text-xs tracking-widest transition-colors">
                 <i class="fas fa-arrow-left mr-2"></i> DASHBOARD
             </button>
         </header>
@@ -67,9 +96,8 @@
         function switchTab(type) {
             if (type === 'prescriptions') {
                 location.href = `/patient/my-prescriptions?patientId=${pId}`;
-            } else if (type === 'tests') {
-                location.href = '/patient-dashboard?tab=tests';
-            } else if (type === 'clinics') {
+            }
+            else if (type === 'clinics') {
                 location.href = '/patient/clinics';
             } else if (type === 'doctors') {
                 location.href = '/patient/doctors';
@@ -82,7 +110,7 @@
                 const res = await fetch('/api/doctors');
                 if (!res.ok) throw new Error("API error");
                 const data = await res.json();
-                
+
                 const grid = document.getElementById('doctorGrid');
                 if (!data || data.length === 0) {
                     grid.innerHTML = `
@@ -141,5 +169,13 @@
 
         loadDoctors();
     </script>
+    <a href="/ai" target="_blank" class="fixed bottom-8 right-8 w-16 h-16 rounded-full bg-gradient-to-r from-blue-400 to-emerald-400 text-white flex items-center justify-center shadow-xl shadow-blue-500/30 hover:shadow-emerald-500/40 hover:scale-110 transition-all duration-300 z-50 group cursor-pointer border-2 border-white">
+        <i class="fa-solid fa-wand-magic-sparkles text-2xl group-hover:rotate-12 transition-transform"></i>
+        <span class="absolute top-0 right-0 flex h-4 w-4">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-4 w-4 bg-emerald-300 border-2 border-white"></span>
+        </span>
+        </a>
 </body>
+
 </html>

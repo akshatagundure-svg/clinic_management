@@ -66,14 +66,14 @@
                     <select id="role" name="role" required
                         class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-slate-700 appearance-none">
                         <option value="" disabled selected>Select your role</option>
-                        <option value="doctor">Medical Doctor</option>
-                        <option value="patient">Patient Portal</option>
-                        <option value="admin">Administrator</option>
+                        <option value="DOCTOR">Medical Doctor</option>
+                        <option value="PATIENT">Patient Portal</option>
+                        <option value="ADMIN">Administrator</option>
                     </select>
                 </div>
             </div>
 
-            <button type="submit" 
+            <button type="submit" id="submitBtn"
                 class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-200 transition-all transform active:scale-[0.98] mt-2">
                 SIGN IN
             </button>
@@ -95,21 +95,23 @@
         
         const errorDiv = document.getElementById('error-msg');
         const errorText = document.getElementById('error-text');
+        const submitBtn = document.getElementById('submitBtn');
+        
         errorDiv.classList.add('hidden');
+        submitBtn.disabled = true;
+        submitBtn.innerText = "VERIFYING...";
 
-        // Capture input values
         const phoneInput = document.getElementById('phone').value.trim();
         const passwordInput = document.getElementById('password').value;
-        const roleInput = document.getElementById('role').value;
+        const roleInput = document.getElementById('role').value; // Values are DOCTOR, PATIENT, or ADMIN
 
-        // ✅ EXTRA FEATURE: Hardcoded Admin Access
-        // This checks for specific admin credentials before calling the server
-        if (roleInput === 'admin' && phoneInput === '9999999999' && passwordInput === 'admin123') {
+        // 1. Hardcoded Admin Access (Overrides API)
+        if (roleInput === 'ADMIN' && phoneInput === '9999999999' && passwordInput === 'admin123') {
             window.location.href = '/dashboard';
-            return; // Exit the function so it doesn't try to call the API
+            return;
         }
 
-        // EXISTING FEATURE: Prepare payload for Doctor/Patient API login
+        // 2. Prepare payload for Doctor/Patient API
         const payload = {
             phone: phoneInput,
             password: passwordInput,
@@ -117,7 +119,6 @@
         };
 
         try {
-            // Existing API call for doctors and patients
             const response = await fetch('/api/doctors/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -127,25 +128,26 @@
             if (response.ok) {
                 const user = await response.json();
                 
-                // Keep your existing redirection logic
-                if (payload.role === 'doctor') {
+                // Redirect based on role
+                if (roleInput === 'DOCTOR') {
                     window.location.href = '/doctordb';
-                } else {
-                    // Redirect for other roles returned by the API
-                    window.location.href = `/${payload.role}/dashboard`;
+                } else if (roleInput === 'PATIENT') {
+                    window.location.href = '/patient/dashboard';
                 }
             } else {
-                // Handles API errors (Invalid credentials for Doctor/Patient)
                 const message = await response.text();
-                errorText.innerText = message || "Invalid phone or password.";
+                errorText.innerText = message || "Invalid credentials. Please try again.";
                 errorDiv.classList.remove('hidden');
             }
         } catch (err) {
-            // Network or Server errors
-            errorText.innerText = "Connection failed. Please check if the server is running.";
+            console.error("Login Error:", err);
+            errorText.innerText = "Server connection error. Please try again later.";
             errorDiv.classList.remove('hidden');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerText = "SIGN IN";
         }
     });
-</script>
+    </script>
 </body>
 </html>

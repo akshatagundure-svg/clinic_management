@@ -107,10 +107,16 @@ public String showAddPatient(HttpSession session, Model model) {
 // Inside WebController.java
 @GetMapping("/patientinfo")
 public String showPatientInfo(HttpSession session, Model model) {
+    // This looks for the object we just added in Step 1
     Doctor doctor = (Doctor) session.getAttribute("loggedInDoctor");
-    if (doctor == null) return "redirect:/login";
+    
+    if (doctor == null) {
+        System.out.println("Session check failed: loggedInDoctor is null");
+        return "redirect:/login";
+    }
 
-    model.addAttribute("doctorId", doctor.getDoctorId());
+    // Pass the ID string to the HTML
+    model.addAttribute("doctorId", doctor.getDoctorId()); 
     return "patientinfo";
 }
     @GetMapping("/add-doctor")
@@ -312,5 +318,31 @@ public String myPrescriptionsPage(HttpSession session, Model model) {
         return "prescription-details"; // Must match prescription-details.html in /templates/
     }
 
+@GetMapping("/patient/my-lab-tests")
+    public String showPatientLabTests(@RequestParam(name = "patientId", required = false) String patientId, Model model) {
+        
+        // You can pass the patientId back to the view if you need it for data fetching
+        model.addAttribute("patientId", patientId);
+        
+        // This tells Spring to load "patient-lab-tests.html" from the templates folder
+        return "patient-lab-tests"; 
+    }
+
+@GetMapping("/")
+public String homePage() {
+    return "login"; 
+}
+
+@GetMapping("/akshata-ai")
+    public String showAiChatPage() {
+        // This tells Spring to look for "akshata-ai.html" in the templates folder
+        return "akshata-ai"; 
+    }
+
+@GetMapping("/ai")
+    public String showAiPage() {
+        // This tells Spring to look for "akshata-ai.html" in the templates folder
+        return "ai"; 
+    }
 
 }

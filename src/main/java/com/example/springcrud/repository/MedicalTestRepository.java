@@ -57,4 +57,11 @@ public interface MedicalTestRepository extends MongoRepository<MedicalTest, Stri
      * Filter by Doctor AND Status
      */
     List<MedicalTest> findByDoctorIdAndResultStatusIgnoreCase(String doctorId, String resultStatus);
+
+    /**
+ * Filter by Patient ID AND Doctor ID
+ * Use case: Patient wants to see all tests ordered specifically by Dr. X
+ */
+List<MedicalTest> findByPatientIdAndDoctorId(String patientId, String doctorId);
+
 }

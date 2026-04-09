@@ -1,12 +1,15 @@
 package com.example.springcrud.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,6 +29,7 @@ import com.example.springcrud.repository.PatientRepository;
 import jakarta.servlet.http.HttpSession;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 @RequestMapping("/api/doctors")
 public class DoctorController {
 
@@ -33,7 +37,11 @@ public class DoctorController {
     private DoctorRepository doctorRepository;
 
     @Autowired
-    private PatientRepository patientRepository; // ✅ Required to fix previous errors
+    private PatientRepository patientRepository;
+
+    // ================= HARDCODED ADMIN CREDENTIALS =================
+    private static final String ADMIN_PHONE    = "9999999999";
+    private static final String ADMIN_PASSWORD = "admin123";
 
     // ================= CREATE =================
     @PostMapping
@@ -89,25 +97,51 @@ public class DoctorController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // ================= AUTHENTICATION (SINGLE ENDPOINT) =================
+    // ================= AUTHENTICATION (ALL 3 ROLES) =================
     @PostMapping("/login")
     public ResponseEntity<?> authUser(@RequestBody LoginRequest request, HttpSession session) {
         String role = request.getRole();
 
-        // 1. Check for Doctor Login
+        if (role == null || role.isBlank()) {
+            return new ResponseEntity<>("Role is required", HttpStatus.BAD_REQUEST);
+        }
+
+        // ── 1. ADMIN (hardcoded) ──────────────────────────────────────
+        if ("ADMIN".equalsIgnoreCase(role)) {
+            if (ADMIN_PHONE.equals(request.getPhone()) &&
+                ADMIN_PASSWORD.equals(request.getPassword())) {
+
+                session.setAttribute("role", "ADMIN");
+                session.setAttribute("adminName", "Administrator");
+
+                Map<String, String> adminResponse = new HashMap<>();
+                adminResponse.put("role", "ADMIN");
+                adminResponse.put("name", "Administrator");
+                adminResponse.put("phone", ADMIN_PHONE);
+
+                return new ResponseEntity<>(adminResponse, HttpStatus.OK);
+            }
+            return new ResponseEntity<>("Invalid admin credentials", HttpStatus.UNAUTHORIZED);
+        }
+
+        // ── 2. DOCTOR ─────────────────────────────────────────────────
         if ("DOCTOR".equalsIgnoreCase(role)) {
             Optional<Doctor> doctor = doctorRepository.findByPhoneAndPassword(
                     request.getPhone(), request.getPassword());
-            
+
             if (doctor.isPresent()) {
-                session.setAttribute("doctorId", doctor.get().getDoctorId());
-                session.setAttribute("doctorName", doctor.get().getName());
+                Doctor loggedInDoctor = doctor.get();
+                session.setAttribute("loggedInDoctor", loggedInDoctor);
+                session.setAttribute("doctorId", loggedInDoctor.getDoctorId());
+                session.setAttribute("doctorName", loggedInDoctor.getName());
                 session.setAttribute("role", "DOCTOR");
-                return new ResponseEntity<>(doctor.get(), HttpStatus.OK);
+                return new ResponseEntity<>(loggedInDoctor, HttpStatus.OK);
             }
-        } 
-        // 2. Check for Patient Login
-        else if ("PATIENT".equalsIgnoreCase(role)) {
+            return new ResponseEntity<>("Invalid doctor credentials", HttpStatus.UNAUTHORIZED);
+        }
+
+        // ── 3. PATIENT ────────────────────────────────────────────────
+        if ("PATIENT".equalsIgnoreCase(role)) {
             Optional<Patient> patient = patientRepository.findByPhoneAndPassword(
                     request.getPhone(), request.getPassword());
 
@@ -117,15 +151,17 @@ public class DoctorController {
                 session.setAttribute("role", "PATIENT");
                 return new ResponseEntity<>(patient.get(), HttpStatus.OK);
             }
+            return new ResponseEntity<>("Invalid patient credentials", HttpStatus.UNAUTHORIZED);
         }
 
-        return new ResponseEntity<>("Invalid credentials or role", HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>("Unknown role: " + role, HttpStatus.BAD_REQUEST);
     }
 
     // ================= UPDATE PROFILE =================
     @PutMapping("/{doctorId}")
-    public ResponseEntity<?> updateDoctor(@PathVariable String doctorId, @RequestBody Doctor details, HttpSession session) {
-
+    public ResponseEntity<?> updateDoctor(@PathVariable String doctorId,
+                                          @RequestBody Doctor details,
+                                          HttpSession session) {
         Optional<Doctor> doctorOptional = doctorRepository.findById(doctorId);
 
         if (doctorOptional.isPresent()) {
@@ -148,9 +184,8 @@ public class DoctorController {
             session.setAttribute("loggedInDoctor", saved);
 
             return new ResponseEntity<>(saved, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("Doctor not found with ID: " + doctorId, HttpStatus.NOT_FOUND);
         }
+        return new ResponseEntity<>("Doctor not found with ID: " + doctorId, HttpStatus.NOT_FOUND);
     }
 
     // ================= DELETE =================

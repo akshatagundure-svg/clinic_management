@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>My Lab Tests | HealthFlow Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .sidebar-gradient {
+            background: #0f172a;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+
+<body class="text-slate-900">
+
+    <input type="hidden" id="sessPatientId" th:value="${session.patientId}">
+    <aside class="sidebar-gradient fixed left-0 top-0 h-screen w-64 text-white z-50">
+        <div class="p-6 text-center border-b border-slate-700/50">
+            <h2 class="text-xl font-bold text-blue-400">HEALTHFLOW <span class="text-white">PRO</span></h2>
+        </div>
+        <nav class="mt-6 px-4 space-y-2">
+            <button onclick="switchTab('clinics')"
+                class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all text-left">
+                <i class="fas fa-hospital mr-3 text-blue-400 w-5"></i> Clinics
+            </button>
+
+            <button onclick="switchTab('doctors')"
+                class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all text-left">
+                <i class="fas fa-user-md mr-3 text-blue-400 w-5"></i> Doctors
+            </button>
+
+            <button onclick="switchTab('prescriptions')"
+                class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all text-left">
+                <i class="fas fa-file-prescription mr-3 text-blue-400 w-5"></i> Prescriptions
+            </button>
+
+            <button onclick="switchTab('tests')"
+                class="w-full flex items-center px-4 py-3 text-sm rounded-xl hover:bg-slate-800 transition-all text-left">
+                <i class="fas fa-microscope mr-3 text-blue-400 w-5"></i> Lab Tests
+            </button>
+        </nav>
+    </aside>
+
+
+    <main class="ml-64 p-10 min-h-screen">
+        <header
+            class="flex justify-between items-center mb-10 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div>
+                <h1 class="text-2xl font-bold">My Laboratory Reports</h1>
+                <p class="text-slate-500 text-sm">View all tests assigned to you by your doctors</p>
+            </div>
+            <button onclick="history.back()"
+                class="bg-slate-100 text-slate-600 px-4 py-2 rounded-lg font-bold text-xs hover:bg-slate-200 transition-all">BACK</button>
+        </header>
+
+        <div id="testsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="col-span-full text-center py-20">
+                <i class="fas fa-circle-notch fa-spin text-blue-500 text-3xl mb-4"></i>
+                <p class="text-slate-400">Fetching your medical records...</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const pId = document.getElementById('sessPatientId').value;
+        async function switchTab(type) {
+            // REDIRECTS to dedicated full pages
+            if (type === 'prescriptions') {
+                location.href = '/patient/my-prescriptions';
+                return;
+            }
+
+            if (type === 'clinics') {
+                location.href = '/patient/clinics';
+                return;
+            }
+
+            if (type === 'doctors') {
+                location.href = '/patient/doctors';
+                return;
+            }
+
+            // REDIRECT to the new Lab Tests page
+            if (type === 'tests') {
+                location.href = `/patient/my-lab-tests?patientId=${pId}`;
+                return;
+            }
+        }
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const patientId = urlParams.get('patientId');
+            const grid = document.getElementById('testsGrid');
+
+            if (!patientId) {
+                grid.innerHTML = `<div class="col-span-full text-center text-red-500">Error: Patient ID not found.</div>`;
+                return;
+            }
+
+            try {
+                // We use your existing MedicalTestController filter endpoint
+                const response = await fetch(`/api/medical-tests/filter?patientId=${patientId}`);
+                const tests = await response.json();
+
+                if (tests.length === 0) {
+                    grid.innerHTML = `
+                        <div class="col-span-full text-center py-20 bg-white rounded-3xl border border-dashed border-slate-300">
+                            <i class="fas fa-microscope text-4xl text-slate-200 mb-4"></i>
+                            <p class="text-slate-500 font-medium">No lab tests have been assigned to you yet.</p>
+                        </div>`;
+                    return;
+                }
+
+                grid.innerHTML = tests.reverse().map(test => `
+                    <div class="glass-card p-6 rounded-[2rem] shadow-sm hover:shadow-md transition-all border-l-4 ${test.resultStatus === 'Completed' ? 'border-l-emerald-500' : 'border-l-amber-500'}">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-lg">${test.testName}</h3>
+                                <span class="text-[10px] font-black text-blue-500 bg-blue-50 px-2 py-0.5 rounded uppercase tracking-widest">${test.category || 'Diagnostic'}</span>
+                            </div>
+                            <span class="px-3 py-1 ${test.resultStatus === 'Completed' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'} rounded-full text-[10px] font-bold uppercase">
+                                ${test.resultStatus || 'Pending'}
+                            </span>
+                        </div>
+                        
+                        <div class="space-y-3 mb-6">
+                            <div class="flex items-center text-xs text-slate-600">
+                                <i class="fas fa-user-md mr-3 text-slate-400"></i>
+                                <div>
+                                    <p class="text-[9px] text-slate-400 uppercase font-bold">Ordered By</p>
+                                    <p class="font-semibold text-slate-700">Dr. ${test.doctorId}</p>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-500 leading-relaxed italic">"${test.description || 'Routine clinical investigation.'}"</p>
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-100 flex justify-between items-center">
+                            <span class="text-sm font-black text-slate-800">₹${test.price || '0.00'}</span>
+                            <button class="bg-slate-900 text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase hover:bg-blue-600 transition-colors">
+                                View Report
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                console.error(err);
+                grid.innerHTML = `<div class="col-span-full text-center text-red-500">Failed to load reports. Please try again.</div>`;
+            }
+        });
+    </script>
+    <a href="/ai" target="_blank" class="fixed bottom-8 right-8 w-16 h-16 rounded-full bg-gradient-to-r from-blue-400 to-emerald-400 text-white flex items-center justify-center shadow-xl shadow-blue-500/30 hover:shadow-emerald-500/40 hover:scale-110 transition-all duration-300 z-50 group cursor-pointer border-2 border-white">
+        <i class="fa-solid fa-wand-magic-sparkles text-2xl group-hover:rotate-12 transition-transform"></i>
+        <span class="absolute top-0 right-0 flex h-4 w-4">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-4 w-4 bg-emerald-300 border-2 border-white"></span>
+        </span>
+        </a>
+</body>
+
+</html>
